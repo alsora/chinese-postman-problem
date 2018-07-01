@@ -1,3 +1,10 @@
+
+# Build folder
+build/
+
+# Bin folder
+bin/
+
 # Prerequisites
 *.d
 
@@ -6,6 +13,9 @@
 *.lo
 *.o
 *.obj
+
+# Visual studio code files
+.vscode
 
 # Precompiled Headers
 *.gch
