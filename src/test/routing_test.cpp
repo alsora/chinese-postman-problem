@@ -25,6 +25,18 @@ int main()
     graph.addEdge(4, 5);
 
 
+    /**
+     *
+     * 1------->2
+     *  ^      /^
+     *   \    / |
+     *    \  <  |
+     *     3    |
+     *    / ^   |
+     *  <     \ |
+     * 4------->5
+     **/
+
 
     RoutingProblem routing = RoutingProblem();
     routing.init(graph, 1);

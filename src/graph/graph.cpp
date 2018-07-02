@@ -85,12 +85,21 @@ Graph::Edge::Edge(Vertex* from, Vertex* to, bool undirected, int id, float cost,
 	_cost = cost;
 	_capacity = capacity;
     _parentId = id;
+
+    _vertices.insert(from);
+    _vertices.insert(to);
     
 }
 
 Graph::Edge::~Edge()
 {
 
+}
+
+
+bool Graph::Edge::operator<(const Edge& other) const
+{
+    return _id < other.id();
 }
 
 
@@ -256,13 +265,13 @@ Graph::Graph( const Graph& graph)
     for (Graph::EdgeIDMap::iterator itE  = edges.begin(); itE != edges.end(); itE ++){
         Graph::Edge* e = itE->second;
         int id = e->id();
-        Vertex* from = new Vertex(*(e->from()));
-        Vertex* to = new Vertex(*(e->to()));
+        int fromId = e->from()->id();
+        int toId = e->to()->id();
         bool undirected = e->undirected();
         float cost = e->cost();
         int capacity = e->capacity();
 
-        Graph::Edge* _e = addEdge(from, to, undirected, cost, capacity);
+        Graph::Edge* _e = addEdge(fromId, toId, undirected, cost, capacity);
         _e->setParentId(e->parentId());
 
     }
@@ -289,13 +298,13 @@ Graph & Graph::operator=(const Graph & graph)
     for (Graph::EdgeIDMap::iterator itE  = edges.begin(); itE != edges.end(); itE ++){
         Graph::Edge* e = itE->second;
         int id = e->id();
-        Vertex* from = new Vertex(*(e->from()));
-        Vertex* to = new Vertex(*(e->to()));
+        int fromId = e->from()->id();
+        int toId = e->to()->id();
         bool undirected = e->undirected();
         float cost = e->cost();
         int capacity = e->capacity();
 
-        Graph::Edge* _e = addEdge(from, to, undirected, cost, capacity);
+        Graph::Edge* _e = addEdge(fromId, toId, undirected, cost, capacity);
         _e->setParentId(e->parentId());
 
     }

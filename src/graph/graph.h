@@ -81,6 +81,9 @@ struct Graph
         const int capacity() const {return _capacity;}
         void setCapacity(int capacity) {_capacity = capacity;} 
 
+        bool operator<(const Edge& other) const;
+        //bool operator>(const Edge& other) const;
+
         protected: 
             VertexSet _vertices;
             int _id;

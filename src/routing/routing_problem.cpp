@@ -33,7 +33,9 @@ void RoutingProblem::init(Graph graph, int startId, int goalId, Graph::EdgeSet n
 std::vector<int> RoutingProblem::solve()
 {
     if (_type == DIRECTED && _notRequiredEdges.empty() && _startId == _goalId){
-
+        std::cout<<"The graph is directed"<<std::endl;
+        simmetryHeuristic(_eulerianExtendedGraph);
+        hierholzerSolver(_eulerianExtendedGraph, _startId, _goalId);
     }
     
     if (_type == UNDIRECTED && _notRequiredEdges.empty() && _startId == _goalId){
@@ -41,11 +43,16 @@ std::vector<int> RoutingProblem::solve()
     }
 
     if (_type == MIXED  && _notRequiredEdges.empty() && _startId == _goalId){
+        std::cout<<"The graph is mixed"<<std::endl;
 
     }
 
 
     return std::vector<int>();
+
+}
+
+void RoutingProblem::hierholzerSolver(Graph& graph, int startId, int goalId){
 
 }
 

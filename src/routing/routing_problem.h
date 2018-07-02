@@ -24,8 +24,14 @@ class RoutingProblem
     private: 
 
         void evenDegreeHeuristic(Graph& graph);
-
+        void simmetryHeuristic(Graph& graph);
+        
         void hierholzerSolver(Graph& graph, int startNodeId, int goalNodeId = Graph::UnassignedId);
+
+
+
+
+        std::map<int, int> computeVerticesSupplyMap(const Graph graph, const  Graph::EdgeSet visitedEdges = Graph::EdgeSet());
 
 
         int _startId;

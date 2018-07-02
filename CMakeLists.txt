@@ -27,6 +27,8 @@ add_executable(routing
   src/test/routing_test.cpp
   src/graph/graph.cpp
   src/routing/routing_problem.cpp
+  src/routing/network_flow.cpp
+  src/routing/simmetry_heuristic.cpp
 )
 
 
