@@ -37,9 +37,15 @@ int main()
      * 4------->5
      **/
 
-
+    
     RoutingProblem routing = RoutingProblem();
     routing.init(graph, 1);
-    routing.solve();
+    std::vector<int> circuit = routing.solve();
+    std::cout<<"Eulerian circuit:"<<std::endl;
+    for (int eId : circuit){
+        Graph::Edge* e = graph.edge(eId);
+        std::cout<<e->from()->id()<<" "<<e->to()->id()<<std::endl;
+    }
+
 
 }

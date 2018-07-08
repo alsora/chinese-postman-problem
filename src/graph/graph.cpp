@@ -22,10 +22,10 @@ Graph::Vertex::~Vertex()
 Graph::EdgeSet Graph::Vertex::enteringEdges()
 {
     Graph::EdgeSet eset;
-    for (EdgeSet::const_iterator e = _edges.begin(); e != _edges.end(); e++) {
+    for (Graph::Edge* e : edges()){
         
-		if (((*e)->to() == this) || ((*e)->undirected()))
-			eset.insert(*e);
+		if ((e->to() == this) || (e->undirected()))
+			eset.insert(e);
 	}
 
 	return eset;
@@ -34,14 +34,33 @@ Graph::EdgeSet Graph::Vertex::enteringEdges()
 Graph::EdgeSet Graph::Vertex::exitingEdges()
 {
     Graph::EdgeSet eset;
-    for (EdgeSet::const_iterator e = _edges.begin(); e != _edges.end(); e++) {
+    for (Graph::Edge* e : edges()){
         
-		if (((*e)->from() == this) || ((*e)->undirected()))
-			eset.insert(*e);
+        if (e->from() == this || e->undirected())
+			eset.insert(e);
 	}
 
 	return eset;
 }
+
+std::set<Graph::PathElement> Graph::Vertex::reachable(){
+    std::set<Graph::PathElement> result;
+
+    Graph::EdgeSet eset = edges();
+
+    for (Graph::Edge* e : eset){
+        Graph::Vertex* from = e->from();
+        Graph::Vertex* to = e->to();
+        bool undirected = e->undirected();
+
+        if (from == this || undirected){
+            result.insert(std::make_pair(to, e));
+        }
+    }
+
+    return result;
+}
+
 
 
 
@@ -96,6 +115,33 @@ Graph::Edge::~Edge()
 
 }
 
+Graph::Edge::Edge(const Graph::Edge & e)
+{
+    _from = new Graph::Vertex(e.from()->id(), e.from()->position());
+    _to = new Graph::Vertex(e.to()->id(), e.to()->position());
+    _id = e.id();
+
+    _undirected = e.undirected();
+    _cost = e.cost();
+	_capacity = e.capacity();
+    _parentId = e.id();
+
+}
+
+
+Graph::Edge & Graph::Edge::operator=(const Graph::Edge & e)
+{
+    _from = new Graph::Vertex(e.from()->id(), e.from()->position());
+    _to = new Graph::Vertex(e.to()->id(), e.to()->position());
+    _id = e.id();
+
+    _undirected = e.undirected();
+    _cost = e.cost();
+	_capacity = e.capacity();
+    _parentId = e.id();
+
+}
+
 
 bool Graph::Edge::operator<(const Edge& other) const
 {
@@ -103,16 +149,18 @@ bool Graph::Edge::operator<(const Edge& other) const
 }
 
 
-Graph::Edge* Graph::addEdge(Vertex* from, Vertex* to, bool undirected, float cost, int capacity)
+Graph::Edge* Graph::addEdge(Vertex* from, Vertex* to, bool undirected, float cost, int capacity, int edgeId)
 {   
     if (cost < 0){
         Vector2f vertexDifference = to->position() - from->position();
         cost = vertexDifference.norm();
     }
 
-    int id = _edgesIdCount + 1;
+    if (edgeId == UnassignedId){
+        edgeId = _edgesIdCount + 1;
+    }
 
-    Edge* e = new Graph::Edge(from, to, undirected, id, cost, capacity);
+    Edge* e = new Graph::Edge(from, to, undirected, edgeId, cost, capacity);
     
     bool result = Graph::addEdge(e);
 
@@ -127,7 +175,7 @@ Graph::Edge* Graph::addEdge(Vertex* from, Vertex* to, bool undirected, float cos
 
 }
 
-Graph::Edge* Graph::addEdge(int fromId, int toId, bool undirected, float cost, int capacity)
+Graph::Edge* Graph::addEdge(int fromId, int toId, bool undirected, float cost, int capacity, int edgeId)
 {   
     Vertex* from = vertex(fromId);
     Vertex* to = vertex(toId);
@@ -142,9 +190,13 @@ Graph::Edge* Graph::addEdge(int fromId, int toId, bool undirected, float cost, i
     }
 
 
-    int id = _edgesIdCount + 1;
+    if (edgeId == UnassignedId){
+        edgeId = _edgesIdCount + 1;
+    }
 
-    Edge* e = new Graph::Edge(from, to, undirected, id, cost, capacity);
+
+
+    Edge* e = new Graph::Edge(from, to, undirected, edgeId, cost, capacity);
     
     bool result = Graph::addEdge(e);
 
@@ -227,6 +279,50 @@ const Graph::Edge* Graph::edge(int id) const
 }
 
 
+bool Graph::removeVertex(Graph::Vertex* v)
+{
+
+    Graph::VertexIDMap::iterator it=_vertices.find(v->id());
+
+    if (it == _vertices.end())
+      return false;
+
+    assert(it->second == v);
+
+    Graph::EdgeSet edges = v->edges();
+    for (Graph::EdgeSet::iterator it = edges.begin(); it != edges.end(); it ++){
+        removeEdge(*it);
+    }
+
+    _vertices.erase(it);
+    delete v;
+    return true;
+
+}
+
+bool Graph::removeEdge(Graph::Edge* e)
+{
+
+    Graph::EdgeIDMap::iterator it = _edges.find(e->id());
+
+    if (it == _edges.end())
+        return false;
+    
+    _edges.erase(it);
+    
+    Graph::EdgeSet::iterator its;
+
+    its = e->from()->edges().find(e);
+    e->from()->edges().erase(its);
+
+    its = e->to()->edges().find(e);
+    e->to()->edges().erase(its);
+
+    delete e;
+    return true;
+
+}
+
 
 Graph::~Graph()
 {
@@ -271,7 +367,7 @@ Graph::Graph( const Graph& graph)
         float cost = e->cost();
         int capacity = e->capacity();
 
-        Graph::Edge* _e = addEdge(fromId, toId, undirected, cost, capacity);
+        Graph::Edge* _e = addEdge(fromId, toId, undirected, cost, capacity, e->id());
         _e->setParentId(e->parentId());
 
     }
@@ -304,7 +400,7 @@ Graph & Graph::operator=(const Graph & graph)
         float cost = e->cost();
         int capacity = e->capacity();
 
-        Graph::Edge* _e = addEdge(fromId, toId, undirected, cost, capacity);
+        Graph::Edge* _e = addEdge(fromId, toId, undirected, cost, capacity, e->id());
         _e->setParentId(e->parentId());
 
     }
@@ -322,15 +418,15 @@ void Graph::printVerticesInfo()
         Graph::Vertex* v = it->second;
         std::cout<< "Vertex " << v->id() << " at " << v->position().transpose();
         if (v->enteringEdges().size() > 0){
-            std::cout <<" +1: ";
+            std::cout <<" +1:";
             for (Graph::Edge* e : v->enteringEdges()){
-                std::cout<<" e " << e->from()<< " " << e->to();
+                std::cout<<" e " << e->from()->id()<< " " << e->to()->id();
             }
         }
         if (v->exitingEdges().size() > 0){
-            std::cout <<" -1: ";
+            std::cout <<" -1:";
             for (Graph::Edge* e : v->exitingEdges()){
-                std::cout<<" e " << e->from()<< " " << e->to();
+                std::cout<<" e " << e->from()->id()<< " " << e->to()->id();
             }
         }
         std::cout<<std::endl;

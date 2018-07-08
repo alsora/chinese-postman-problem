@@ -8,7 +8,7 @@ RoutingProblem::RoutingProblem()
 
 RoutingProblem::~RoutingProblem()
 {
-
+    clear();
 }
 
 void RoutingProblem::init(Graph graph, int startId, int goalId, Graph::EdgeSet notRequiredEdges)
@@ -34,8 +34,10 @@ std::vector<int> RoutingProblem::solve()
 {
     if (_type == DIRECTED && _notRequiredEdges.empty() && _startId == _goalId){
         std::cout<<"The graph is directed"<<std::endl;
-        simmetryHeuristic(_eulerianExtendedGraph);
-        hierholzerSolver(_eulerianExtendedGraph, _startId, _goalId);
+
+        simmetryHeuristic(&_eulerianExtendedGraph);
+
+        return hierholzerSolver(_eulerianExtendedGraph, _startId, _goalId);
     }
     
     if (_type == UNDIRECTED && _notRequiredEdges.empty() && _startId == _goalId){
@@ -52,7 +54,49 @@ std::vector<int> RoutingProblem::solve()
 
 }
 
-void RoutingProblem::hierholzerSolver(Graph& graph, int startId, int goalId){
+std::vector<int> RoutingProblem::hierholzerSolver(Graph& graph, int startId, int goalId){
+
+    std::vector<int> circuit;
+    std::stack<int> currentPath;
+
+    Graph requiredGraph = graph;
+
+    for (Graph::EdgeIDMap::iterator it = graph.edges().begin(); it != graph.edges().end();it++){
+        if (_notRequiredEdges.find(it->second) != _notRequiredEdges.end()){
+            int eId = it->first;
+            Graph::Edge* e = requiredGraph.edge(eId);
+            requiredGraph.removeEdge(e);
+        }
+    }
+
+    int vId = startId;
+
+    do {
+        Graph::Vertex* currentV = requiredGraph.vertex(vId);
+        Graph::EdgeSet edges = currentV->exitingEdges();
+
+        if (edges.size() > 0){
+            Graph::Edge* e = (*edges.begin());
+            currentPath.push(e->id());
+            vId = (e->from()->id() == currentV->id()) ? e->to()->id() : e->from()->id();
+            requiredGraph.removeEdge(e);
+        }
+        else if (!currentPath.empty()) {
+            int previousEdgeId = currentPath.top();
+            currentPath.pop();
+
+            Graph::Edge* previousEdge = graph.edge(previousEdgeId);
+            vId = (previousEdge->from()->id() == currentV->id()) ? previousEdge->to()->id() : previousEdge->from()->id();
+            circuit.push_back(previousEdge->parentId());
+        }
+
+
+    } while (!currentPath.empty());
+
+
+    std::reverse(circuit.begin(), circuit.end());
+
+    return circuit;
 
 }
 

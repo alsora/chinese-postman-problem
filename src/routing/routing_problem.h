@@ -2,6 +2,7 @@
 #define __ROUTING_PROBLEM_H__
 
 #include "graph/graph.h"
+#include <stack>
 
 enum GraphType { DIRECTED, UNDIRECTED, MIXED };
 
@@ -20,18 +21,16 @@ class RoutingProblem
 
         GraphType detectGraphType(Graph graph);
 
-
     private: 
 
-        void evenDegreeHeuristic(Graph& graph);
-        void simmetryHeuristic(Graph& graph);
-        
-        void hierholzerSolver(Graph& graph, int startNodeId, int goalNodeId = Graph::UnassignedId);
+        void evenDegreeHeuristic(Graph* graph);
+        std::map<int, int> simmetryHeuristic(Graph* graph);
+
+        std::vector<int> hierholzerSolver(Graph& graph, int startNodeId, int goalNodeId = Graph::UnassignedId);
 
 
 
 
-        std::map<int, int> computeVerticesSupplyMap(const Graph graph, const  Graph::EdgeSet visitedEdges = Graph::EdgeSet());
 
 
         int _startId;

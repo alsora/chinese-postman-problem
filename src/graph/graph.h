@@ -27,6 +27,17 @@ struct Graph
     typedef std::unordered_map<int, Vertex*> VertexIDMap;
     typedef std::unordered_map<int, Edge*> EdgeIDMap;
 
+    typedef std::pair<Graph::Vertex*, Graph::Edge*> PathElement;
+
+    struct cmpPathElements {
+    bool operator()(const PathElement& a, const PathElement& b) const {
+        //std::cout<<a.first->id()<< " "<< a.second->id()<<" ... " << b.first->id()<<" "<<b.second->id()<<std::endl;
+        if (a.first->id() != b.first->id()){
+            return a.first->id() < b.first->id();
+        }
+        return a.second->id() < b.second->id();
+    }
+};
     
     struct Vertex {
 
@@ -44,6 +55,10 @@ struct Graph
 
         EdgeSet enteringEdges();
         EdgeSet exitingEdges();
+        
+        // Follows all the edges exiting and list reachable vertices
+        std::set<Graph::PathElement> reachable();
+
 
         protected:
             int _id;
@@ -58,6 +73,10 @@ struct Graph
         Edge(Vertex* from, Vertex* to, bool undirected, int id, float cost, int capacity);
         ~Edge();
 
+        // Copy constructor and assignement operator
+        Edge(const Edge& e);
+	    Edge& operator=(const Edge& e);
+
         const VertexSet vertices() const {return _vertices;}
         VertexSet vertices() {return _vertices;}
 
@@ -67,10 +86,13 @@ struct Graph
         Vertex* to() {return _to;}
 
         const int id() const {return _id;}
-        void setId(int id);
+        void setId(int id){_id = id;}
 
         const int parentId() const {return _parentId;}
         void setParentId(int id){_parentId = id;}
+
+        //const Edge* parentEdge() const {return _parentEdge;}
+        //void setParentEdge(Edge* e){_parentEdge = e; _parentId = e->id();}
 
         const bool undirected() const {return _undirected;}
         void setUndirected(bool undirected) {_undirected = undirected;}
@@ -90,6 +112,7 @@ struct Graph
             Vertex* _from;
             Vertex* _to;
             int _parentId;
+            //Edge* _parentEdge;
 
             bool _undirected;
             float  _cost;
@@ -131,8 +154,8 @@ struct Graph
     Graph::Vertex* addVertex(const int& id, Vector2f position = Vector2f(0.0, 0.0));
 
     // Adds an edge to the graph, returns a null pointer if something fails
-    Graph::Edge* addEdge(Vertex* from, Vertex* to, bool undirected = false, float cost = -1, int capacity = INT_MAX);
-    Graph::Edge* addEdge(int fromId, int toId, bool undirected = false, float cost = -1, int capacity = INT_MAX);
+    Graph::Edge* addEdge(Vertex* from, Vertex* to, bool undirected = false, float cost = -1, int capacity = INT_MAX, int edgeId = UnassignedId);
+    Graph::Edge* addEdge(int fromId, int toId, bool undirected = false, float cost = -1, int capacity = INT_MAX, int edgeId = UnassignedId);
 
     // Detaches a vertex from all its connected edges
     bool detachVertex(Vertex* v);
