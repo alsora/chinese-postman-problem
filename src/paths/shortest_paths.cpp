@@ -80,7 +80,7 @@ namespace shortest_paths
 
 
 
-    void mapDijkstra(const Graph graph, vector<int> startVerticesId, vector<int> endVerticesId, map<pair<int, int>, float>* D, map<pair<int, int>, std::vector<int>>* P)
+    void mapDijkstra(const Graph graph, vector<int> startVerticesId, vector<int> endVerticesId, map<pair<int, int>, float>* D, map<pair<int, int>, vector<int>>* P)
     {
         
         for (int startId : startVerticesId){

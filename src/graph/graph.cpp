@@ -53,7 +53,12 @@ std::set<Graph::PathElement> Graph::Vertex::reachable(){
         Graph::Vertex* to = e->to();
         bool undirected = e->undirected();
 
-        if (from == this || undirected){
+        if (from == this){
+            result.insert(std::make_pair(to, e));
+        }
+
+        if (undirected){
+            Graph::Vertex* to = (e->from() == this) ? e->to() : e->from();
             result.insert(std::make_pair(to, e));
         }
     }

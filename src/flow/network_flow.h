@@ -3,6 +3,9 @@
 
 #include <map>
 #include "graph/graph.h"
+#include "graph/graph.h"
+#include "paths/shortest_paths.h"
+#include "utilities.h"
 
 namespace network_flow
 {
@@ -16,6 +19,8 @@ namespace network_flow
     void successiveShortestPath(Graph graph, std::map<std::pair<int,int>, int>& flowMatrix);
 
     std::pair<Graph, Graph::EdgeSet> computeResidualGraph(Graph originalGraph, std::map<std::pair<int,int>, int>& flowMatrix, std::map<int, float> potentials);
+
+	std::vector<int> naivePairsAssignment(std::vector<int> elements, std::map<std::pair<int, int>, float> distanceMap);
 
 
 }

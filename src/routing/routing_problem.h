@@ -2,6 +2,8 @@
 #define __ROUTING_PROBLEM_H__
 
 #include "graph/graph.h"
+#include "paths/shortest_paths.h"
+#include "flow/network_flow.h"
 #include <stack>
 
 enum GraphType { DIRECTED, UNDIRECTED, MIXED };

@@ -30,6 +30,7 @@ add_executable(routing
   src/routing/extension_heuristics.cpp
   src/flow/network_flow.cpp
   src/paths/shortest_paths.cpp
+  src/utilities.cpp
 )
 
 

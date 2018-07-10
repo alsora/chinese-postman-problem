@@ -1,6 +1,5 @@
 #include "network_flow.h"
-#include "graph/graph.h"
-#include "paths/shortest_paths.h"
+
 
 
 namespace network_flow
@@ -233,6 +232,51 @@ namespace network_flow
 		return std::make_pair(residualGraph, residualSet);
 	}
 
+
+
+	std::vector<int> naivePairsAssignment(std::vector<int> elements, std::map<std::pair<int, int>, float> distanceMap)
+	{
+		
+
+		std::vector<std::vector<int>> perms = allAssignments(elements.size(), 2);
+
+		float minCost =  std::numeric_limits<float>::infinity(); 
+		std::vector<int> best_assignment;
+
+		for (int i = 0; i < perms.size(); i++){
+
+			std::vector<int> assignment = perms[i];
+			float cost = 0;
+
+			for (int j = 1; j <= elements.size()/2; j++){
+				int firstId = -1;
+				int secondId = -1;
+
+				for (int k = 0; k < assignment.size();k++){
+					int label = assignment[k];
+					if (label == j && firstId == -1){
+						firstId = k; 
+					}
+					else if (label == j && secondId == -1){
+						secondId = k;
+					}
+				}
+
+				assert (firstId >= 0 && secondId >= 0);
+
+				cost += distanceMap[std::make_pair(firstId, secondId)];
+				
+			}
+
+			if (cost < minCost){
+				minCost = cost;
+				best_assignment = assignment;
+			}
+
+		}
+
+		return best_assignment;
+	}
 
 
 }

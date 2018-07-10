@@ -42,6 +42,10 @@ std::vector<int> RoutingProblem::solve()
     
     if (_type == UNDIRECTED && _notRequiredEdges.empty() && _startId == _goalId){
         std::cout<<"The graph is undirected"<<std::endl;
+
+        evenDegreeHeuristic(&_eulerianExtendedGraph);
+
+        return hierholzerSolver(_eulerianExtendedGraph, _startId, _goalId);
     }
 
     if (_type == MIXED  && _notRequiredEdges.empty() && _startId == _goalId){
@@ -130,8 +134,8 @@ GraphType RoutingProblem::detectGraphType(Graph graph)
 
 void RoutingProblem::clear()
 {
-    delete &_originalGraph;
-    delete &_eulerianExtendedGraph;
+    //delete &_originalGraph;
+    //delete &_eulerianExtendedGraph;
     _notRequiredEdges.clear();
 
     _startId = Graph::UnassignedId;
