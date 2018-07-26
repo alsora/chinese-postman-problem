@@ -114,3 +114,111 @@ std::map<int, int> RoutingProblem::simmetryHeuristic(Graph* graph)
 	return addedEdges;
 }
 
+
+
+std::tuple<std::vector<int>, std::vector<int>, std::vector<int>> RoutingProblem::fredericksonInOutDegree(Graph* graph)
+{
+
+	std::vector<int> directedElements;
+	std::vector<int> undirectedElements;
+	std::vector<int> addedElements;
+
+	Graph g2 = *graph;
+	Graph g3 = *graph;
+
+
+	//Loop on original edges, since I'm adding edges in g2. quadruplicate edges and add arcs to directed elements
+	for (Graph::EdgeIDMap::iterator it = graph->edges().begin(); it != graph->edges().end(); it++) {
+		Graph::Edge* e =it->second;
+		if (!e->undirected()) {
+			directedElements.push_back(e->id());
+			continue;
+		}
+			
+		Graph::Vertex* vFrom = g3.vertex(e->from()->id());
+		Graph::Vertex* vTo = g3.vertex(e->to()->id());
+		//Substitute old edge with 2 pairs of arcs
+		Graph::Edge* newArc;
+
+		newArc = g3.addEdge(vFrom, vTo, false, e->cost(), e->capacity());
+		newArc->setParentId(e->id());
+		newArc = g3.addEdge(vTo, vFrom, false, e->cost(), e->capacity());
+		newArc->setParentId(e->id());
+		newArc = g3.addEdge(vFrom, vTo, false, 0.0, 1);
+		newArc->setParentId(e->id());
+		newArc = g3.addEdge(vTo, vFrom, false, 0.0, 1);
+		newArc->setParentId(e->id());
+		g3.removeEdge(g3.edge(e->id()));
+	}
+
+	
+	std::map<int, int> newEdges = simmetryHeuristic(&g3);
+
+
+	for (std::map<int, int>::iterator itMap = newEdges.begin(); itMap != newEdges.end(); itMap++) {
+		//Add new edges to original graph
+		int thisId = itMap->first;
+		int countCopies = itMap->second;
+		Graph::Edge* e = g3.edge(thisId);
+		//Check that I'm considering a 0 cost directed edge
+		if (countCopies == 1 && e->cost() == 0 && e->capacity() == 1) {
+			//Check that I have not used the opposite direction 0 cost edge
+			bool oppositeDirection = false;
+			for (std::map<int, int>::iterator it = newEdges.begin(); it != newEdges.end(); it++) {
+				Graph::Edge* e2 = g3.edge(it->first);
+
+				if (it->second != 1 || e2->parentId() != e->parentId() || e2->cost() != 0 || e2->capacity() != 1)
+					continue;
+
+				if (e2->from()->id() == e->to()->id() && e2->to()->id() == e->from()->id()) {
+					oppositeDirection = true;
+					break;
+				}
+			}
+
+			if (!oppositeDirection) {
+				Graph::Vertex* vFrom = g2.vertex(e->from()->id());
+				Graph::Vertex* vTo = g2.vertex(e->to()->id());
+				Graph::Edge* edgeOriginal = g2.edge(e->parentId());
+				Graph::Edge* new_e = g2.addEdge(vFrom, vTo, false, edgeOriginal->cost(), edgeOriginal->capacity());
+				new_e->setParentId(e->parentId());
+				g2.removeEdge(edgeOriginal);
+				directedElements.push_back(new_e->id());
+
+			}
+			//If the opposite direction has been used, I do nothing.
+
+
+		}
+		else {
+			Graph::Vertex* vFrom = g2.vertex(e->from()->id());
+			Graph::Vertex* vTo = g2.vertex(e->to()->id());
+			for (int i = 0; i < countCopies; i++) {
+				//This works as duplicateLinks
+				Graph::Edge* ed = g2.addEdge(vFrom, vTo, false, e->cost(), e->capacity());
+				ed->setParentId(e->parentId());
+				directedElements.push_back(ed->id());
+				addedElements.push_back(ed->id());
+			}
+		}
+
+	}
+
+	//Insert in undirected set the remained edges
+	for (Graph::EdgeIDMap::iterator it = g2.edges().begin(); it != g2.edges().end(); it++) {
+		Graph::Edge* e = it->second;
+		if (e->undirected()) {
+			undirectedElements.push_back(e->id());
+		}
+
+	}
+
+
+	*graph = g2;
+
+	return std::tuple<std::vector<int>, std::vector<int>, std::vector<int>>(directedElements, undirectedElements, addedElements);
+
+
+
+
+}

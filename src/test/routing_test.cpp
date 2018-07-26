@@ -3,6 +3,8 @@
 #include "graph/graph.h"
 #include "routing/routing_problem.h"
 #include "flow/network_flow.h"
+#include "opencv_utilities.h"
+
 using namespace Eigen;
 
 int main()
@@ -39,9 +41,11 @@ int main()
      * 4------->5
      **/
 
+
+    int startId = 1;
     
     RoutingProblem routing = RoutingProblem();
-    routing.init(graph, 1);
+    routing.init(graph, startId);
     std::vector<int> circuit = routing.solve();
     std::cout<<"Eulerian circuit:"<<std::endl;
     for (int eId : circuit){
@@ -49,5 +53,7 @@ int main()
         std::cout<<e->from()->id()<<" "<<e->to()->id()<<std::endl;
     }
 
+
+    animatePath(graph, circuit, startId);
 
 }

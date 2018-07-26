@@ -30,6 +30,7 @@ class RoutingProblem
 
         std::vector<int> hierholzerSolver(Graph& graph, int startNodeId, int goalNodeId = Graph::UnassignedId);
 
+        std::tuple<std::vector<int>, std::vector<int>, std::vector<int>> fredericksonInOutDegree(Graph* graph);
 
 
 

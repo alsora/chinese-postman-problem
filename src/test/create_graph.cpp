@@ -1,6 +1,9 @@
 #include <iostream>
 #include <eigen3/Eigen/Dense>
 #include "graph/graph.h"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv_utilities.h"
+
 
 using namespace Eigen;
 
@@ -25,5 +28,12 @@ int main()
 
     graph.printVerticesInfo();
     graph.printEdgesInfo();
+
+
+    cv::Mat img = drawGraph(graph);
+
+    cv::namedWindow("my window", CV_WINDOW_AUTOSIZE);
+    cv::imshow("my window", img);
+    cv::waitKey(0);
 
 }
