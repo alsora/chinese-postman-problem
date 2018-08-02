@@ -8,7 +8,7 @@ namespace network_flow
 	int SOURCE_ID = -1000;
     int SINK_ID = -1001;
 
-	std::map<int, int> computeVerticesSupplyMap(const Graph graph, const Graph::EdgeSet visitedEdges)
+	std::map<int, int> computeVerticesSupplyMap(const Graph graph, const std::set<int> visitedEdges)
 	{
 		std::map<int, int> verticesSupplyMap;
 
@@ -25,7 +25,7 @@ namespace network_flow
 				if (e->undirected())
 					continue;
 				
-				if (std::find(visitedEdges.begin(), visitedEdges.end(), e) != visitedEdges.end())
+				if (std::find(visitedEdges.begin(), visitedEdges.end(), e->id()) != visitedEdges.end())
 					continue;
 
 				if (e->from() == v) {
@@ -37,7 +37,11 @@ namespace network_flow
 			}
 
 			degree = inDegree - outDegree;
-			verticesSupplyMap.insert(std::pair<int, int>(itV->first, degree));
+
+			if (degree != 0){
+				verticesSupplyMap.insert(std::pair<int, int>(itV->first, degree));
+			}
+
 
 		}
 

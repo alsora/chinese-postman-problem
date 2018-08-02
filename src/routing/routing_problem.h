@@ -2,11 +2,8 @@
 #define __ROUTING_PROBLEM_H__
 
 #include "graph/graph.h"
-#include "paths/shortest_paths.h"
-#include "flow/network_flow.h"
-#include <stack>
+#include "graph/graph_utils.h"
 
-enum GraphType { DIRECTED, UNDIRECTED, MIXED };
 
 
 class RoutingProblem
@@ -17,31 +14,23 @@ class RoutingProblem
         ~RoutingProblem();
         void clear();
 
-        void init(const Graph graph, const int startId, int goalId = Graph::UnassignedId, Graph::EdgeSet travelEdges = Graph::EdgeSet());
+        void init(const Graph graph, const int startId, int goalId = Graph::UnassignedId, std::set<int> travelEdges = std::set<int>());
 
         std::vector<int> solve();
 
-        GraphType detectGraphType(Graph graph);
-
     private: 
 
-        void evenDegreeHeuristic(Graph* graph);
-        std::map<int, int> simmetryHeuristic(Graph* graph);
+      
 
         std::vector<int> hierholzerSolver(Graph& graph, int startNodeId, int goalNodeId = Graph::UnassignedId);
-
-        std::tuple<std::vector<int>, std::vector<int>, std::vector<int>> fredericksonInOutDegree(Graph* graph);
-
-
-
 
 
         int _startId;
         int _goalId;
-        Graph::EdgeSet _notRequiredEdges;
+        std::set<int> _notRequiredEdges;
 
         Graph _originalGraph;
-        GraphType _type;
+        graph_utils::GraphType _type;
         Graph _eulerianExtendedGraph;
 
 };

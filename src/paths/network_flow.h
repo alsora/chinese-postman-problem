@@ -10,7 +10,7 @@
 namespace network_flow
 {
 
-    std::map<int, int> computeVerticesSupplyMap(const Graph graph, const  Graph::EdgeSet visitedEdges = Graph::EdgeSet());
+    std::map<int, int> computeVerticesSupplyMap(const Graph graph, const  std::set<int> visitedEdges = std::set<int>());
 
 	std::map<std::pair<int,int>, int> minCostMaxFlowMatching(Graph graph, std::map<int, int> verticesSupplyMap);
 

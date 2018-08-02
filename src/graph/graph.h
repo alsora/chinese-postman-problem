@@ -1,12 +1,8 @@
 #ifndef _GRAPH_H_
 #define _GRAPH_H_
 
-#include <map>
 #include <unordered_map>
 #include <set>
-#include <vector>
-#include <limits>
-#include <iostream>
 #include <eigen3/Eigen/Dense>
 
 using namespace Eigen;
@@ -160,11 +156,6 @@ struct Graph
     // Detaches a vertex from all its connected edges
     bool detachVertex(Vertex* v);
         
-    // Print information about all the vertices in the graph
-    void printVerticesInfo();
-    // Print information about all the edges in the graph
-    void printEdgesInfo();
-
     protected:
 
         // Adds an edge to the graph, returns false if something fails

@@ -1,5 +1,5 @@
 #include "graph.h"
-
+#include <iostream>
 
 Graph::Vertex::Vertex(int id)
 {
@@ -415,38 +415,3 @@ Graph & Graph::operator=(const Graph & graph)
 
 }
 
-
-
-void Graph::printVerticesInfo()
-{
-    for (Graph::VertexIDMap::const_iterator it = _vertices.begin(); it != _vertices.end(); it++){
-        Graph::Vertex* v = it->second;
-        std::cout<< "Vertex " << v->id() << " at " << v->position().transpose();
-        if (v->enteringEdges().size() > 0){
-            std::cout <<" +1:";
-            for (Graph::Edge* e : v->enteringEdges()){
-                std::cout<<" e " << e->from()->id()<< " " << e->to()->id();
-            }
-        }
-        if (v->exitingEdges().size() > 0){
-            std::cout <<" -1:";
-            for (Graph::Edge* e : v->exitingEdges()){
-                std::cout<<" e " << e->from()->id()<< " " << e->to()->id();
-            }
-        }
-        std::cout<<std::endl;
-    }
-}
-
-
-void Graph::printEdgesInfo()
-{
-    for (Graph::EdgeIDMap::const_iterator it = _edges.begin(); it != _edges.end(); it++){
-        Graph::Edge* e = it->second;
-        std::cout<< "Edge " << e->from()->id() << " "<< e->to()->id() << (e->undirected() ? " Undirected" : " Directed") << " Cost: " << e->cost() << " Capacity: " << (e->capacity() == INT_MAX ? std::numeric_limits<float>::infinity() : e->capacity()) << " Id " << e->id();
-        if (e->parentId() != e->id()){
-            std::cout << " ParentId: " << e->parentId();
-        }
-        std::cout<<std::endl;
-    }
-}

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <eigen3/Eigen/Dense>
 #include "graph/graph.h"
+#include "graph/graph_utils.h"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv_utilities.h"
 
@@ -26,8 +27,8 @@ int main()
     graph.addEdge(5, 3);
     graph.addEdge(4, 5);
 
-    graph.printVerticesInfo();
-    graph.printEdgesInfo();
+    graph_utils::printVerticesInfo(graph);
+    graph_utils::printEdgesInfo(graph);
 
 
     cv::Mat img = drawGraph(graph);

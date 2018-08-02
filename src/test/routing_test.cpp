@@ -2,7 +2,6 @@
 #include <eigen3/Eigen/Dense>
 #include "graph/graph.h"
 #include "routing/routing_problem.h"
-#include "flow/network_flow.h"
 #include "opencv_utilities.h"
 
 using namespace Eigen;
@@ -24,10 +23,13 @@ int main()
     graph.addEdge(1, 2, undirected);
     graph.addEdge(2, 3, undirected);
     graph.addEdge(3, 4, undirected);
-    graph.addEdge(5, 2, undirected);
+    Graph::Edge* e = graph.addEdge(5, 2, undirected);
     graph.addEdge(5, 3, undirected);
     graph.addEdge(4, 5, undirected);
 
+
+    std::set<int> eset;
+    eset.insert(e->id());
 
     /**
      *
@@ -45,7 +47,7 @@ int main()
     int startId = 1;
     
     RoutingProblem routing = RoutingProblem();
-    routing.init(graph, startId);
+    routing.init(graph, startId, startId, eset);
     std::vector<int> circuit = routing.solve();
     std::cout<<"Eulerian circuit:"<<std::endl;
     for (int eId : circuit){

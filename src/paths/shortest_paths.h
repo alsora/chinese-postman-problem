@@ -2,7 +2,7 @@
 #define __SHORTEST_PATHS_H__
 
 
-
+#include <map>
 
 namespace shortest_paths
 {

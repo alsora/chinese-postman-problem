@@ -22,7 +22,9 @@ include_directories(src)
 add_executable(create_graph
   src/test/create_graph.cpp
   src/graph/graph.cpp
+  src/graph/graph_utils.cpp
   src/opencv_utilities.cpp
+  src/paths/shortest_paths.cpp
 )
 
 target_link_libraries(create_graph
@@ -32,9 +34,11 @@ target_link_libraries(create_graph
 add_executable(routing
   src/test/routing_test.cpp
   src/graph/graph.cpp
+  src/graph/graph_utils.cpp
   src/routing/routing_problem.cpp
-  src/routing/extension_heuristics.cpp
-  src/flow/network_flow.cpp
+  src/routing/eulerian_extension.cpp
+  src/routing/branch_bound.cpp
+  src/paths/network_flow.cpp
   src/paths/shortest_paths.cpp
   src/utilities.cpp
   src/opencv_utilities.cpp

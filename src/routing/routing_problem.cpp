@@ -1,5 +1,7 @@
 #include "routing/routing_problem.h"
-
+#include "eulerian_extension.h"
+#include <stack>
+#include <iostream>
 
 RoutingProblem::RoutingProblem()
 {
@@ -11,7 +13,7 @@ RoutingProblem::~RoutingProblem()
     clear();
 }
 
-void RoutingProblem::init(Graph graph, int startId, int goalId, Graph::EdgeSet notRequiredEdges)
+void RoutingProblem::init(Graph graph, int startId, int goalId, std::set<int> notRequiredEdges)
 {
     _originalGraph = Graph(graph);
     _startId = startId;
@@ -26,29 +28,52 @@ void RoutingProblem::init(Graph graph, int startId, int goalId, Graph::EdgeSet n
 
     _eulerianExtendedGraph = Graph(graph);
 
-    _type = detectGraphType(graph);
+    _type = graph_utils::detectGraphType(graph);
     
 }
 
 std::vector<int> RoutingProblem::solve()
 {
-    if (_type == DIRECTED && _notRequiredEdges.empty() && _startId == _goalId){
+
+    if (_type == graph_utils::DIRECTED && _notRequiredEdges.empty() && _startId == _goalId){
         std::cout<<"The graph is directed"<<std::endl;
 
-        simmetryHeuristic(&_eulerianExtendedGraph);
+        eulerian_extension::simmetryHeuristic(&_eulerianExtendedGraph, _notRequiredEdges);
 
         return hierholzerSolver(_eulerianExtendedGraph, _startId, _goalId);
+    }
+
+    if (_type == graph_utils::DIRECTED && !_notRequiredEdges.empty() && _startId == _goalId){
+        std::cout<<"The graph is directed and rural"<<std::endl;
+
+        std::set<int> otps = eulerian_extension::ruralSolver(&_eulerianExtendedGraph, _notRequiredEdges, _type);
+
+        graph_utils::refineEdges(&_eulerianExtendedGraph, otps);
+
+        return hierholzerSolver(_eulerianExtendedGraph, _startId, _goalId);
+
     }
     
-    if (_type == UNDIRECTED && _notRequiredEdges.empty() && _startId == _goalId){
+    if (_type == graph_utils::UNDIRECTED && _notRequiredEdges.empty() && _startId == _goalId){
         std::cout<<"The graph is undirected"<<std::endl;
 
-        evenDegreeHeuristic(&_eulerianExtendedGraph);
+        eulerian_extension::evenDegreeHeuristic(&_eulerianExtendedGraph, _notRequiredEdges);
 
         return hierholzerSolver(_eulerianExtendedGraph, _startId, _goalId);
     }
 
-    if (_type == MIXED  && _notRequiredEdges.empty() && _startId == _goalId){
+    if (_type == graph_utils::UNDIRECTED && !_notRequiredEdges.empty() && _startId == _goalId){
+        std::cout<<"The graph is undirected and rural"<<std::endl;
+
+        std::set<int> otps = eulerian_extension::ruralSolver(&_eulerianExtendedGraph, _notRequiredEdges, _type);
+
+        graph_utils::refineEdges(&_eulerianExtendedGraph, otps);
+
+        return hierholzerSolver(_eulerianExtendedGraph, _startId, _goalId);
+
+    }
+
+    if (_type == graph_utils::MIXED  && _notRequiredEdges.empty() && _startId == _goalId){
         std::cout<<"The graph is mixed"<<std::endl;
 
     }
@@ -66,7 +91,7 @@ std::vector<int> RoutingProblem::hierholzerSolver(Graph& graph, int startId, int
     Graph requiredGraph = graph;
 
     for (Graph::EdgeIDMap::iterator it = graph.edges().begin(); it != graph.edges().end();it++){
-        if (_notRequiredEdges.find(it->second) != _notRequiredEdges.end()){
+        if (_notRequiredEdges.find(it->second->id()) != _notRequiredEdges.end()){
             int eId = it->first;
             Graph::Edge* e = requiredGraph.edge(eId);
             requiredGraph.removeEdge(e);
@@ -104,33 +129,6 @@ std::vector<int> RoutingProblem::hierholzerSolver(Graph& graph, int startId, int
 
 }
 
-
-GraphType RoutingProblem::detectGraphType(Graph graph)
-{
-    bool hasEdge = false;
-    bool hasArc = false;
-
-    Graph::EdgeIDMap edges = graph.edges();
-    for (Graph::EdgeIDMap::const_iterator it = edges.begin(); it != edges.end(); it++){
-        Graph::Edge* e = it->second;
-
-        if (e->undirected()){
-            hasEdge = true;
-        }
-        else {
-            hasArc = true;
-        }
-
-    }
-
-    if (!hasArc)
-        return UNDIRECTED;
-    else if (hasArc && !hasEdge)
-        return DIRECTED;
-    else
-        return MIXED;
-
-}
 
 void RoutingProblem::clear()
 {
