@@ -14,6 +14,8 @@ namespace graph_utils {
 
     void refineEdges(Graph* graph, std::set<int> edges);
 
+    std::vector<int> pathEdgesToVertices(std::vector<int> edgesPath, Graph g, int startVertexId);
+
 
     void printVerticesInfo(Graph graph);
     void printEdgesInfo(Graph graph);

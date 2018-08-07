@@ -26,64 +26,111 @@ void RoutingProblem::init(Graph graph, int startId, int goalId, std::set<int> no
 
     _notRequiredEdges = notRequiredEdges;
 
-    _eulerianExtendedGraph = Graph(graph);
-
     _type = graph_utils::detectGraphType(graph);
     
 }
 
+
 std::vector<int> RoutingProblem::solve()
-{
+{   
 
-    if (_type == graph_utils::DIRECTED && _notRequiredEdges.empty() && _startId == _goalId){
-        std::cout<<"The graph is directed"<<std::endl;
-
-        eulerian_extension::simmetryHeuristic(&_eulerianExtendedGraph, _notRequiredEdges);
-
-        return hierholzerSolver(_eulerianExtendedGraph, _startId, _goalId);
-    }
-
-    if (_type == graph_utils::DIRECTED && !_notRequiredEdges.empty() && _startId == _goalId){
-        std::cout<<"The graph is directed and rural"<<std::endl;
-
-        std::set<int> otps = eulerian_extension::ruralSolver(&_eulerianExtendedGraph, _notRequiredEdges, _type);
-
-        graph_utils::refineEdges(&_eulerianExtendedGraph, otps);
-
-        return hierholzerSolver(_eulerianExtendedGraph, _startId, _goalId);
-
-    }
-    
-    if (_type == graph_utils::UNDIRECTED && _notRequiredEdges.empty() && _startId == _goalId){
-        std::cout<<"The graph is undirected"<<std::endl;
-
-        eulerian_extension::evenDegreeHeuristic(&_eulerianExtendedGraph, _notRequiredEdges);
-
-        return hierholzerSolver(_eulerianExtendedGraph, _startId, _goalId);
-    }
-
-    if (_type == graph_utils::UNDIRECTED && !_notRequiredEdges.empty() && _startId == _goalId){
-        std::cout<<"The graph is undirected and rural"<<std::endl;
-
-        std::set<int> otps = eulerian_extension::ruralSolver(&_eulerianExtendedGraph, _notRequiredEdges, _type);
-
-        graph_utils::refineEdges(&_eulerianExtendedGraph, otps);
-
-        return hierholzerSolver(_eulerianExtendedGraph, _startId, _goalId);
-
-    }
-
-    if (_type == graph_utils::MIXED  && _notRequiredEdges.empty() && _startId == _goalId){
-        std::cout<<"The graph is mixed"<<std::endl;
-
-    }
-
-
-    return std::vector<int>();
+    return solve(_originalGraph, _type, _startId, _goalId, _notRequiredEdges);
 
 }
 
-std::vector<int> RoutingProblem::hierholzerSolver(Graph& graph, int startId, int goalId){
+std::vector<int> RoutingProblem::solve(Graph& g, graph_utils::GraphType type, int startId, int goalId, std::set<int> travelEdges)
+{
+    
+    _eulerianExtendedGraph = Graph(g);
+
+    std::vector<int> circuit;
+
+    if (startId == goalId){
+
+        eulerian_extension::extend(_eulerianExtendedGraph, type, travelEdges);
+
+        circuit = hierholzerSolver(_eulerianExtendedGraph, startId);
+
+    }
+    else {
+
+        //Add artificial edge
+        bool undirected = _type == graph_utils::UNDIRECTED;
+        Graph::Edge* virtualEdge = _eulerianExtendedGraph.addEdge(_goalId, _startId, undirected, 9999999);
+        int virtualEdgeId = virtualEdge->id();
+
+        eulerian_extension::extend(_eulerianExtendedGraph, type, travelEdges);
+
+        circuit = hierholzerSolver(_eulerianExtendedGraph, _goalId);
+
+        //Remove artificial edge
+        circuit = adjustOpenProblem(virtualEdgeId, circuit);
+
+    }
+
+
+
+    return circuit;
+}
+
+
+std::vector<int> RoutingProblem::adjustOpenProblem(int virtualEdgeId, std::vector<int> eulerianCircuit)
+{
+
+    ptrdiff_t artificialEdgePosition = find(eulerianCircuit.begin(), eulerianCircuit.end(), virtualEdgeId) - eulerianCircuit.begin();
+    assert (artificialEdgePosition < eulerianCircuit.size());
+
+    std::vector<int> verticesCircuit = graph_utils::pathEdgesToVertices(eulerianCircuit, _eulerianExtendedGraph, _goalId);
+
+    int fromId = verticesCircuit[artificialEdgePosition];
+    int toId = verticesCircuit[artificialEdgePosition + 1];
+
+    assert ((fromId == _goalId && toId == _startId) || (fromId == _startId && toId == _goalId));
+
+	if (fromId == _startId) {
+
+		//(g...s)->g transformed into (s...g)
+		if (artificialEdgePosition == eulerianCircuit.size() - 1) {
+			eulerianCircuit.pop_back();
+			std::reverse(eulerianCircuit.begin(), eulerianCircuit.end());
+		}
+		//(g...s)->g...g transformed into (s...g) ...g
+		else {
+			std::vector<int> firstPart = std::vector<int>(eulerianCircuit.begin(), eulerianCircuit.begin() + artificialEdgePosition);
+			std::vector<int> secondPart = std::vector<int>(eulerianCircuit.begin() + artificialEdgePosition + 1, eulerianCircuit.end());
+
+			std::reverse(firstPart.begin(), firstPart.end());
+
+			eulerianCircuit = firstPart;
+			eulerianCircuit.insert(eulerianCircuit.end(), secondPart.begin(), secondPart.end());
+		}
+	}
+	else if (fromId == _goalId) {
+
+		//g->(s...g) transformed into (s...g)
+		if (artificialEdgePosition == 0) {
+			eulerianCircuit.erase(eulerianCircuit.begin());
+		}
+		//g...g->(s...g) transformed into (s...g) ...g
+		else {
+			std::vector<int> firstPart = std::vector<int>(eulerianCircuit.begin(), eulerianCircuit.begin() + artificialEdgePosition);
+			std::vector<int> secondPart = std::vector<int>(eulerianCircuit.begin() + artificialEdgePosition + 1, eulerianCircuit.end());
+
+			eulerianCircuit = secondPart;
+			eulerianCircuit.insert(eulerianCircuit.end(), firstPart.begin(), firstPart.end());
+		}
+
+	}
+
+
+
+    return eulerianCircuit;
+    
+}
+
+
+
+std::vector<int> RoutingProblem::hierholzerSolver(Graph& graph, int startId){
 
     std::vector<int> circuit;
     std::stack<int> currentPath;
@@ -109,6 +156,7 @@ std::vector<int> RoutingProblem::hierholzerSolver(Graph& graph, int startId, int
             currentPath.push(e->id());
             vId = (e->from()->id() == currentV->id()) ? e->to()->id() : e->from()->id();
             requiredGraph.removeEdge(e);
+            
         }
         else if (!currentPath.empty()) {
             int previousEdgeId = currentPath.top();
@@ -124,6 +172,7 @@ std::vector<int> RoutingProblem::hierholzerSolver(Graph& graph, int startId, int
 
 
     std::reverse(circuit.begin(), circuit.end());
+
 
     return circuit;
 

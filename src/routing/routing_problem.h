@@ -20,10 +20,11 @@ class RoutingProblem
 
     private: 
 
-      
+        std::vector<int> solve(Graph& g, graph_utils::GraphType type, int startId, int goalId, std::set<int> travelEdges = std::set<int>());
 
-        std::vector<int> hierholzerSolver(Graph& graph, int startNodeId, int goalNodeId = Graph::UnassignedId);
+        std::vector<int> hierholzerSolver(Graph& graph, int startNodeId);
 
+        std::vector<int> adjustOpenProblem(int virtualEdgeId, std::vector<int> eulerianCircuit);
 
         int _startId;
         int _goalId;

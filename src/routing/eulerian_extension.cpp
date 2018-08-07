@@ -9,6 +9,56 @@ namespace eulerian_extension
 {
 
 
+        
+    Graph extend(Graph& graph, graph_utils::GraphType type, std::set<int> travelEdges)
+    {
+
+        if (travelEdges.empty()){
+
+            heuristicExtension(&graph, type, travelEdges);
+
+        }
+        else {
+
+            std::set<int> otps = eulerian_extension::ruralSolver(&graph, travelEdges, type);
+
+            graph_utils::refineEdges(&graph, otps);
+
+        }
+
+        if (type == graph_utils::MIXED  && travelEdges.empty()){
+            std::cout<<"The graph is mixed"<<std::endl;
+
+        }
+
+        return graph;
+
+
+    }
+
+
+    void heuristicExtension(Graph* graph, graph_utils::GraphType type, std::set<int> travelEdges)
+    {
+            
+         if (type == graph_utils::DIRECTED){
+            std::cout<<"The graph is directed"<<std::endl;
+
+            eulerian_extension::simmetryHeuristic(graph, travelEdges);
+        }                
+        else if (type == graph_utils::UNDIRECTED){
+            std::cout<<"The graph is undirected"<<std::endl;
+
+            eulerian_extension::evenDegreeHeuristic(graph, travelEdges);
+
+        }
+
+    }
+
+
+
+
+
+
     void evenDegreeHeuristic(Graph* graph, std::set<int> notRequiredEdges)
     {
 
@@ -305,13 +355,11 @@ namespace eulerian_extension
         Graph optimalGraph = *graph;
 
         bool undirected = type == graph_utils::UNDIRECTED;
-
         //Add artificial OTPs edges
         for (std::map<std::pair<int, int>, std::vector<int>>::const_iterator it = optimalTravelPaths.begin(); it != optimalTravelPaths.end(); it++) {
 
             if ((it->second).empty())
                 continue;
-
 
             int fromId = it->first.first;
             int toId = it->first.second;
@@ -329,15 +377,16 @@ namespace eulerian_extension
         BranchNBoundStruct lowerBound = BranchNBoundStruct(optimalGraph, otpEdges);
 
         std::priority_queue<BranchNBoundStruct, std::vector<BranchNBoundStruct>, std::greater<BranchNBoundStruct>> pq;
+
         pq.push(lowerBound);
 
         while (!pq.empty()) {
-
             //Extract top (lower cost) element from the priority queue
             BranchNBoundStruct currentStruct = pq.top();
             pq.pop();
             //If the lower cost element has no unlabelled OTP edges -> I have found a solution
             if (currentStruct.remainedElements.empty()) {
+                heuristicExtension(&currentStruct.graph, type, notRequiredEdges);
                 *graph = currentStruct.graph;
                 return otpEdges;
             }
@@ -360,46 +409,31 @@ namespace eulerian_extension
 
             }
 
-        
+            Graph g;
             BranchNBoundStruct structA = currentStruct;
             Graph::Edge* branchEdgeA = structA.graph.edge(branchEdgeId);
 
             structA.graph.removeEdge(branchEdgeA);
             structA.remainedElements.erase(branchEdgeId);
-
-            if (type == graph_utils::DIRECTED){
-                simmetryHeuristic(&structA.graph, notRequiredEdges);
-            }
-            else{
-                evenDegreeHeuristic(&structA.graph, notRequiredEdges);
-            }
+            g = structA.graph;
+            heuristicExtension(&g, type, notRequiredEdges);
 
             structA.cost = graph_utils::eulerianCost(structA.graph);
             pq.push(structA);
 
-            
             BranchNBoundStruct structB = currentStruct;
             structB.graph.edge(branchEdgeId)->setCost(realCost);
             structB.remainedElements.erase(branchEdgeId);
 
-            if (type == graph_utils::DIRECTED){
-                simmetryHeuristic(&structB.graph, notRequiredEdges);
-            }
-            else{
-                evenDegreeHeuristic(&structB.graph, notRequiredEdges);
-            }
+            g = structB.graph;
+            heuristicExtension(&g, type, notRequiredEdges);
 
             structB.cost = graph_utils::eulerianCost(structB.graph);
             pq.push(structB);
 
         }
 
-
-
     }
-
-
-
 
 
 }

@@ -17,19 +17,19 @@ int main()
     graph.addVertex(4, Vector2f(0, 0));
     graph.addVertex(5, Vector2f(10, 0));
 
-    bool undirected = true;
+    bool undirected = false;
 
-    graph.addEdge(3, 1, undirected);
-    graph.addEdge(1, 2, undirected);
-    graph.addEdge(2, 3, undirected);
-    graph.addEdge(3, 4, undirected);
-    Graph::Edge* e = graph.addEdge(5, 2, undirected);
-    graph.addEdge(5, 3, undirected);
-    graph.addEdge(4, 5, undirected);
+    Graph::Edge* e1 = graph.addEdge(3, 1, undirected);
+    Graph::Edge* e2 = graph.addEdge(1, 2, undirected);
+    Graph::Edge* e3 = graph.addEdge(2, 3, undirected);
+    Graph::Edge* e4 = graph.addEdge(3, 4, undirected);
+    Graph::Edge* e5 = graph.addEdge(5, 2, undirected);
+    Graph::Edge* e6 = graph.addEdge(5, 3, undirected);
+    Graph::Edge* e7 = graph.addEdge(4, 5, undirected);
 
 
     std::set<int> eset;
-    eset.insert(e->id());
+    eset.insert(e5->id());
 
     /**
      *
@@ -44,15 +44,17 @@ int main()
      **/
 
 
-    int startId = 1;
+    int startId = 3;
+    int goalId = 5;
     
     RoutingProblem routing = RoutingProblem();
-    routing.init(graph, startId, startId, eset);
+    routing.init(graph, startId, goalId, eset);
     std::vector<int> circuit = routing.solve();
+
+    std::vector<int> verticesCircuit = graph_utils::pathEdgesToVertices(circuit, graph, startId);
     std::cout<<"Eulerian circuit:"<<std::endl;
-    for (int eId : circuit){
-        Graph::Edge* e = graph.edge(eId);
-        std::cout<<e->from()->id()<<" "<<e->to()->id()<<std::endl;
+    for (int vId : verticesCircuit){
+        std::cout<<vId <<std::endl;
     }
 
 

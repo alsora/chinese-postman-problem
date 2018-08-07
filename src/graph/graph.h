@@ -27,7 +27,6 @@ struct Graph
 
     struct cmpPathElements {
     bool operator()(const PathElement& a, const PathElement& b) const {
-        //std::cout<<a.first->id()<< " "<< a.second->id()<<" ... " << b.first->id()<<" "<<b.second->id()<<std::endl;
         if (a.first->id() != b.first->id()){
             return a.first->id() < b.first->id();
         }
@@ -81,26 +80,25 @@ struct Graph
         const Vertex* to() const {return _to;}
         Vertex* to() {return _to;}
 
-        const int id() const {return _id;}
+        int id() const {return _id;}
         void setId(int id){_id = id;}
 
-        const int parentId() const {return _parentId;}
+        int parentId() const {return _parentId;}
         void setParentId(int id){_parentId = id;}
 
         //const Edge* parentEdge() const {return _parentEdge;}
         //void setParentEdge(Edge* e){_parentEdge = e; _parentId = e->id();}
 
-        const bool undirected() const {return _undirected;}
+        bool undirected() const {return _undirected;}
         void setUndirected(bool undirected) {_undirected = undirected;}
 
-        const float cost() const {return _cost;}
+        float cost() const {return _cost;}
         void setCost(float cost) {_cost = cost;}
 
-        const int capacity() const {return _capacity;}
+        int capacity() const {return _capacity;}
         void setCapacity(int capacity) {_capacity = capacity;} 
 
         bool operator<(const Edge& other) const;
-        //bool operator>(const Edge& other) const;
 
         protected: 
             VertexSet _vertices;

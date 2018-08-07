@@ -1,9 +1,15 @@
 # Chinese-Postman-Problem
-Framework for creating graph structures and computing Eulerian circuits on them, using the Chinese Postman Problem.
+Framework for creating graph structures and computing Eulerian circuits on them, using Chinese Postman Problem algorithms.
+An Eulerian circuit is a path which allows the agent to visit all the edges of a graph at least once.
+The CPP uses combinatorial optimization techniques in order to find the minimum cost Eulerian circuit.
 
-Solver for all types of graphs or CPP variants: directed graph, undirected graph, mixed graph, closed problem, rural problem, open problem.
+This solver can handle all the possible combinations of graph's types, CPP's variants and output path requirements. 
+Graph's edges can be either all directed, all undirected or a mixture of the two.
+The standard CPP problem require all the edges to be visited, while in the rural one it is possible to specify a subset of edges which is not compulsory to be visited.
+The output can be a circuit, i.e. a closed path where the start and end nodes are coincident, or a generic open path.
 
 ![eulerian circuit animation](https://github.com/alsora/chinese-postman-problem/blob/master/routing.gif)
+
 Animation of the Eulerian circuit computed on a simple directed graph.
 Traversed edges are coloured in orange.
 
@@ -29,11 +35,7 @@ Run the test scripts in order to try the framework
 
     $ cd ../bin
 
-Create a graph structure
-
-    $ ./create_graph
-   
-Solve a CPP problem and compute an eulerian circuit
+For example: to solve a CPP problem and compute an eulerian path
      
     $ ./routing
 
@@ -44,10 +46,10 @@ Here you can find a reference to the theory behind the CPP and its solvers imple
 
 |   | Directed | Undirected | Mixed |
 | ------------- | ------------- | ------------- |------------- |
-| **Standard**  | Simmetry Heuristic | Even Degree Heuristic | 3/2 Bbounded Solution|
+| **Standard**  | Simmetry Heuristic | Even Degree Heuristic | Mixed Approach 3/2|
 | **Rural**  | Branch & Bound  | Branch & Bound | Minimum Spanning Tree|
-| **Open**  | Directed Artificial Edge | Undirected Artificial Edge | Directed Artificial Edge |
 
+An open path between any two vertices can be computed adding an artificial edge between them.
 
 Pull Requests with modern algorithms (there's a lot of stuff with genetic algorithms for example!) are very welcomed.
 

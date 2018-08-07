@@ -95,10 +95,34 @@ namespace graph_utils
 
     }
 
+    std::vector<int> pathEdgesToVertices(std::vector<int> edgesPath, Graph g, int startVertexId)
+    {
+
+
+        std::vector<int> verticesPath;
+
+        verticesPath.push_back(startVertexId);
+
+        for (int eId : edgesPath){
+            Graph::Edge* e = g.edge(eId);
+            int nextId = (e->from()->id() == verticesPath.back()) ? e->to()->id() : e->from()->id();
+
+            verticesPath.push_back(nextId); 
+
+        }
+
+        return verticesPath;
+
+    }
+
+
 
 
     void printVerticesInfo(Graph g)
     {
+
+        std::cout<<"Printing vertices info ------->"<<std::endl;
+
         for (Graph::VertexIDMap::const_iterator it = g.vertices().begin(); it != g.vertices().end(); it++){
             Graph::Vertex* v = it->second;
             std::cout<< "Vertex " << v->id() << " at " << v->position().transpose();
@@ -121,6 +145,9 @@ namespace graph_utils
 
     void printEdgesInfo(Graph g)
     {
+
+        std::cout<<"Printing edges info ------->"<<std::endl;
+
         for (Graph::EdgeIDMap::const_iterator it = g.edges().begin(); it != g.edges().end(); it++){
             Graph::Edge* e = it->second;
             std::cout<< "Edge " << e->from()->id() << " "<< e->to()->id() << (e->undirected() ? " Undirected" : " Directed") << " Cost: " << e->cost() << " Capacity: " << (e->capacity() == INT_MAX ? std::numeric_limits<float>::infinity() : e->capacity()) << " Id " << e->id();
