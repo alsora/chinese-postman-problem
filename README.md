@@ -1,5 +1,9 @@
 # Chinese-Postman-Problem
 Framework for creating graph structures and computing Eulerian circuits on them, using Chinese Postman Problem algorithms.
+
+## What's the Chinese Postman Problem (CPP)
+
+
 An Eulerian circuit is a path which allows the agent to visit all the edges of a graph at least once.
 The CPP uses combinatorial optimization techniques in order to find the minimum cost Eulerian circuit.
 
@@ -13,14 +17,14 @@ The output can be a circuit, i.e. a closed path where the start and end nodes ar
 Animation of the Eulerian circuit computed on a simple directed graph.
 Traversed edges are coloured in orange.
 
-### Requirements
+## Requirements
 
  - Eigen
  - OpenCV (only for visualizing the results)
 
 
 
- ### Usage
+ ## Usage
 
  Build the project
 
@@ -40,7 +44,7 @@ For example: to solve a CPP problem and compute an eulerian path
     $ ./routing
 
  
-### References
+## References
 
 Here you can find a reference to the theory behind the CPP and its solvers implemented in this repository.
 
