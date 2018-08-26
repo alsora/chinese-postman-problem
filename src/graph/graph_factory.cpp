@@ -57,21 +57,24 @@ std::pair<Graph, std::set<int>> buildRandomGraph()
     Graph graph;
 
     int nVertices = 25;
-    int nEdges = 40;
+    int nEdges =35;
+    int nVisited = 0;
+    bool undirected = true;
+
+
 
     float maxX = 20;
     float minX = 0;
     float maxY = 20;
     float minY = 0;
 
-    bool undirected = true;
-
-    srand (static_cast <unsigned> (time(0)));
 
     for (int i = 1; i <= nVertices; i++){
 
-        float x = minX + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(maxX-minX)));
-        float y = minY + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(maxY-minY)));
+        float x = minX + (rand() % static_cast<int>(maxX - minX + 1));
+        float y = minY + (rand() % static_cast<int>(maxY - minY + 1));
+        //float x = minX + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(maxX-minX)));
+        //float y = minY + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(maxY-minY)));
 
         graph.addVertex(i, Vector2f(x, y));
 
@@ -106,8 +109,15 @@ std::pair<Graph, std::set<int>> buildRandomGraph()
 
     }
 
-
     std::set<int> eset;
+    for (auto it = graph.edges().begin(); it != graph.edges().end(); it++){
+        if (eset.size()>=nVisited){
+            break;
+        }
+        eset.insert((*it).first);
+    }
+
+
 
     return std::make_pair(graph, eset);
 

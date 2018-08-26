@@ -52,10 +52,6 @@ namespace eulerian_extension
     }
 
 
-
-
-
-
     void evenDegreeHeuristic(Graph* graph, std::set<int> notRequiredEdges)
     {
 
@@ -115,9 +111,8 @@ namespace eulerian_extension
 
             for (int eId : path){
                 Graph::Edge* e = graph->edge(eId);
-                Graph::Vertex* fromV = e->from();
-                Graph::Vertex* toV = e->to();
-
+                Graph::Vertex* fromV = graph->vertex(e->from()->id());
+                Graph::Vertex* toV = graph->vertex(e->to()->id());
                 Graph::Edge* duplicatedEdge = graph->addEdge(fromV->id(), toV->id(), e->undirected(), e->cost(), e->capacity());
                 duplicatedEdge->setParentId(e->parentId());
             }

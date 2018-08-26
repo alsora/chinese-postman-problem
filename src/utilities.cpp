@@ -61,27 +61,28 @@ void compute(std::set<int>& set, std::vector<int>& currentResults, std::vector<s
 
 }
 
-std::vector<std::vector<int>> allPermutations(int N, int K)
-{	
-    std::vector<std::vector<int>> output;
-    /*
-    std::string bitmask(K, 1); // K leading 1's
-    bitmask.resize(N, 0); // N-K trailing 0's
-    
-    do {
-        int combo[K];
-        int pos = 0;
-        for (int i = 0; i < N; ++i) // [0..N-1] integers
-        {
-            if (bitmask[i]){
-                combo[pos] = i;
-                pos++;
-            }
-        }
-        output.push_back(combo);
-    } while (std::prev_permutation(bitmask.begin(), bitmask.end()));
-    */
+float vector_mean(std::vector<int> v)
+{
 
-    return output;
+    float mean = accumulate( v.begin(), v.end(), 0.0)/v.size(); 
+
+    return mean;
+}
+
+
+float vector_std_dev(std::vector<int> v)
+{
+
+    float mean = vector_mean(v);
+
+    float acc = 0;
+    for( int n = 0; n < v.size(); n++ ){
+        acc += (v[n] - mean) * (v[n] - mean);
+    }
+    acc /= v.size();
+
+    float std = sqrt(acc);
+
+    return std;
 
 }

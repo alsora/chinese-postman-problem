@@ -12,12 +12,12 @@ using namespace Eigen;
 int main()
 {
 
+    srand(time(0));
+
     std::pair<Graph, std::set<int>> res = buildRandomGraph();
     Graph graph = res.first;
     std::set<int> eset = res.second;
     
-    graph_utils::printEdgesInfo(graph);
-
     int startId = 1;
     int goalId = 1;
     

@@ -118,6 +118,91 @@ namespace graph_utils
 
 
 
+
+std::vector<std::vector<int>> tarjanConnectedComponents(Graph graph)
+{
+
+	std::map<int, int> discoveryTime;
+	std::map<int, int> lowIndices;
+	std::map<int, bool> markedVertices;
+	std::stack<int> connectedAncestors;
+	std::vector<std::vector<int>> connectedComponents;
+
+	int time = 0;
+
+	for (Graph::VertexIDMap::iterator it = graph.vertices().begin(); it != graph.vertices().end(); it++) {
+		discoveryTime.insert(std::pair<int, int>(it->first, -1));
+		lowIndices.insert(std::pair<int, int>(it->first, -1));
+		markedVertices.insert(std::pair<int, bool>(it->first, false));
+
+	}
+
+
+	for (Graph::VertexIDMap::iterator it = graph.vertices().begin(); it != graph.vertices().end(); it++) {
+		if (discoveryTime.at(it->first) == -1)
+			tarjanConnectedComponentsRecursion(graph, it->first, &discoveryTime, &lowIndices, &connectedAncestors, &markedVertices, &time, &connectedComponents);
+	}
+
+
+
+	return connectedComponents;
+
+}
+
+
+void tarjanConnectedComponentsRecursion(Graph graph, int vertexID, std::map<int, int>* discoveryTime, std::map<int, int>* lowIndices, std::stack<int>* connectedAncestors, std::map<int, bool>* markedVertices, int* time, std::vector<std::vector<int>>* connectedComponents)
+{
+
+	discoveryTime->at(vertexID) = lowIndices->at(vertexID) = (*time)++;
+	connectedAncestors->push(vertexID);
+	markedVertices->at(vertexID) = true;
+
+	std::vector<int> connectedComponent;
+
+	Graph::EdgeSet exitingEdges = graph.vertex(vertexID)->exitingEdges();
+
+	for (Graph::EdgeSet::iterator it = exitingEdges.begin(); it != exitingEdges.end(); it++) {
+		int vertexAdjacentID;
+		if ((*it)->from()->id() != vertexID)
+			vertexAdjacentID = (*it)->from()->id();
+		else
+			vertexAdjacentID = (*it)->to()->id();
+
+		if (discoveryTime->at(vertexAdjacentID) == -1) {
+
+			tarjanConnectedComponentsRecursion(graph, vertexAdjacentID, discoveryTime, lowIndices, connectedAncestors, markedVertices, time, connectedComponents);
+			lowIndices->at(vertexID) = std::min(lowIndices->at(vertexID), lowIndices->at(vertexAdjacentID));
+		}
+
+		else if (markedVertices->at(vertexAdjacentID) == true) {
+			lowIndices->at(vertexID) = std::min(lowIndices->at(vertexID), discoveryTime->at(vertexAdjacentID));
+		}
+	}
+
+
+	int w = 0;
+	if (lowIndices->at(vertexID) == discoveryTime->at(vertexID)) {
+		while (connectedAncestors->top() != vertexID) {
+			w = connectedAncestors->top();
+			markedVertices->at(w) = false;
+			connectedComponent.push_back(w);
+			connectedAncestors->pop();
+
+		}
+		w = connectedAncestors->top();
+		markedVertices->at(w) = false;
+		connectedComponent.push_back(w);
+		connectedComponents->push_back(connectedComponent);
+		connectedAncestors->pop();
+
+	}
+
+}
+
+
+
+
+
     void printVerticesInfo(Graph g)
     {
 

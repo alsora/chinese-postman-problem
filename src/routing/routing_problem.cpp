@@ -19,6 +19,9 @@ RoutingProblem::~RoutingProblem()
 
 void RoutingProblem::init(Graph graph, int startId, int goalId, std::set<int> notRequiredEdges)
 {
+
+    clear();
+
     _originalGraph = Graph(graph);
     _startId = startId;
     if (goalId == Graph::UnassignedId){
@@ -50,6 +53,37 @@ std::vector<int> RoutingProblem::solve(Graph& g, graph_utils::GraphType type, in
     _eulerianExtendedGraph = Graph(g);
 
     std::vector<int> circuit;
+
+    if (!travelEdges.empty()){
+
+        bool connected = false;
+        double lowerCost = INT_MAX;
+        int lowerExitingId;
+
+        Graph::Vertex* v = g.vertex(1);
+
+        for (auto it = g.vertex(startId)->edges().begin(); it != g.vertex(startId)->edges().end(); it++) {
+            Graph::Edge* e = dynamic_cast<Graph::Edge*> (*it);
+
+            if (e->from()->id() == startId || e->undirected()) {
+                if (e->cost() < lowerCost) {
+                    lowerCost = e->cost();
+                    lowerExitingId = e->id();
+                }
+
+            }
+
+            if (travelEdges.find(e->id()) == travelEdges.end()) {
+                connected = true;
+                break;
+            }
+        }
+
+        if (!connected)
+            travelEdges.erase(lowerExitingId);
+
+    }
+
 
     if (startId == goalId){
 

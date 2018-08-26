@@ -252,19 +252,12 @@ namespace network_flow
 			std::vector<int> assignment = perms[i];
 			float cost = 0;
 
-			for (int j = 1; j <= elements.size()/2; j++){
-				int firstId = -1;
-				int secondId = -1;
-
-				for (int k = 0; k < assignment.size();k++){
-					int label = assignment[k];
-					if (label == j && firstId == -1){
-						firstId = k; 
-					}
-					else if (label == j && secondId == -1){
-						secondId = k;
-					}
-				}
+			for (int j = 0; j < assignment.size(); j += 2){
+            
+				int firstElement = assignment[j];
+				int firstId = elements[firstElement];
+				int secondElement = assignment[j + 1];
+				int secondId = elements[secondElement];
 
 				assert (firstId >= 0 && secondId >= 0);
 

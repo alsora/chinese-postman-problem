@@ -20,6 +20,8 @@ class RoutingProblem
 
     private: 
 
+        //void ensureConnectedGraph(Graph& g, )
+
         std::vector<int> solve(Graph& g, graph_utils::GraphType type, int startId, int goalId, std::set<int> travelEdges = std::set<int>());
 
         std::vector<int> hierholzerSolver(Graph& graph, int startNodeId);

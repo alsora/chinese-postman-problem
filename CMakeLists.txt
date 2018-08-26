@@ -63,5 +63,11 @@ if (OpenCV_FOUND)
 endif()
 
 
+add_executable(benchmark
+  src/test/benchmark.cpp
+  ${ROUTING_SRC}
+)
 
-
+if (OpenCV_FOUND)
+  target_link_libraries(benchmark ${OpenCV_LIBS})
+endif()

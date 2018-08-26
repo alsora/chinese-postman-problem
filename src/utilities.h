@@ -10,10 +10,10 @@
 
 std::vector<std::vector<int>> allAssignments(int N, int K);
 
-std::vector<std::vector<int>> allPermutations(int N, int K);
-
 void compute(std::set<int>& set, std::vector<int>& currentResults, std::vector<std::vector<int>>& results);
 
+float vector_mean(std::vector<int> v);
 
+float vector_std_dev(std::vector<int> v);
 
 #endif

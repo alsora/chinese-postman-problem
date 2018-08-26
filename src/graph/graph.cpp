@@ -412,6 +412,9 @@ Graph::Graph( const Graph& graph)
 
     }
 
+    _verticesIdCount = graph._verticesIdCount;
+    _edgesIdCount = graph._edgesIdCount;
+
 }
 Graph & Graph::operator=(const Graph & graph)
 {
@@ -444,6 +447,9 @@ Graph & Graph::operator=(const Graph & graph)
         _e->setParentId(e->parentId());
 
     }
+
+    _verticesIdCount = graph._verticesIdCount;
+    _edgesIdCount = graph._edgesIdCount;
 
     return *this;
 
