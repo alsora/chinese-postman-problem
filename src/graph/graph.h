@@ -151,6 +151,9 @@ struct Graph
     Graph::Edge* addEdge(Vertex* from, Vertex* to, bool undirected = false, float cost = -1, int capacity = INT_MAX, int edgeId = UnassignedId);
     Graph::Edge* addEdge(int fromId, int toId, bool undirected = false, float cost = -1, int capacity = INT_MAX, int edgeId = UnassignedId);
 
+    // Returns set of edges between two nodes
+    std::set<int> getEdgesBetweenVertices(int v1, int v2);
+
     // Detaches a vertex from all its connected edges
     bool detachVertex(Vertex* v);
         

@@ -2,8 +2,11 @@
 #include <eigen3/Eigen/Dense>
 #include "graph/graph.h"
 #include "graph/graph_utils.h"
+#include "graph/graph_factory.h"
+#ifdef OPENCV_LIBRARY_FOUND
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv_utilities.h"
+#endif
 
 
 using namespace Eigen;
@@ -31,10 +34,14 @@ int main()
     graph_utils::printEdgesInfo(graph);
 
 
+    #ifdef OPENCV_LIBRARY_FOUND
     cv::Mat img = drawGraph(graph);
 
     cv::namedWindow("my window", CV_WINDOW_AUTOSIZE);
     cv::imshow("my window", img);
     cv::waitKey(0);
+    #endif
+
+
 
 }

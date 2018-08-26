@@ -11,44 +11,56 @@ set(EXECUTABLE_OUTPUT_PATH "../bin")
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
-find_package( OpenCV REQUIRED )
-include_directories(${OpenCV_INCLUDE_DIRS})
+find_package( OpenCV )
+if (OpenCV_FOUND)
+  add_definitions ( -DOPENCV_LIBRARY_FOUND=12 )
+  include_directories(${OpenCV_INCLUDE_DIRS})
+endif()
 
 
 include_directories(src)
 
 #MESSAGE( STATUS "variable is: " ${EIGEN3_INCLUDE_DIR} )
 
-add_executable(create_graph
-  src/test/create_graph.cpp
+set(CREATE_GRAPH_SRC 
   src/graph/graph.cpp
   src/graph/graph_utils.cpp
-  src/opencv_utilities.cpp
+  src/graph/graph_factory.cpp
   src/paths/shortest_paths.cpp
 )
 
-target_link_libraries(create_graph
-  ${OpenCV_LIBS}
+if (OpenCV_FOUND)
+  set (CREATE_GRAPH_SRC ${CREATE_GRAPH_SRC}
+    src/opencv_utilities.cpp
+  )
+endif()
+
+add_executable(create_graph
+  src/test/create_graph.cpp
+  ${CREATE_GRAPH_SRC}
 )
 
-add_executable(routing
-  src/test/routing_test.cpp
-  src/graph/graph.cpp
-  src/graph/graph_utils.cpp
+if (OpenCV_FOUND)
+  target_link_libraries(create_graph ${OpenCV_LIBS})
+endif()
+
+set (ROUTING_SRC ${CREATE_GRAPH_SRC}
   src/routing/routing_problem.cpp
   src/routing/eulerian_extension.cpp
   src/routing/branch_bound.cpp
   src/paths/network_flow.cpp
-  src/paths/shortest_paths.cpp
   src/utilities.cpp
-  src/opencv_utilities.cpp
+)
+
+add_executable(routing
+  src/test/routing_test.cpp
+  ${ROUTING_SRC}
 )
 
 
-target_link_libraries(routing
-  ${OpenCV_LIBS}
-)
-
+if (OpenCV_FOUND)
+  target_link_libraries(routing ${OpenCV_LIBS})
+endif()
 
 
 

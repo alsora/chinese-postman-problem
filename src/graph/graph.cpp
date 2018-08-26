@@ -329,6 +329,41 @@ bool Graph::removeEdge(Graph::Edge* e)
 }
 
 
+
+std::set<int> Graph::getEdgesBetweenVertices(int v1Id, int v2Id)
+{
+
+    std::set<int> eset;
+
+    Graph::Vertex* v1 = vertex(v1Id);
+
+    if (v1 == nullptr){
+        return eset;
+    }
+
+    Graph::Vertex* v2 = vertex(v2Id);
+
+    if (v2 == nullptr){
+        return eset;
+    }
+
+    Graph::EdgeSet v1Edges = v1->edges();
+
+    for (Graph::EdgeSet::iterator it = v1Edges.begin(); it != v1Edges.end(); it ++){
+
+        Graph::Edge* e = *it;
+
+        if (e->from() == v2 || e->to() == v2){
+            eset.insert(e->id());
+        }
+    }
+
+
+    return eset;
+}
+
+
+
 Graph::~Graph()
 {
     clear();

@@ -2,6 +2,10 @@
 #include "eulerian_extension.h"
 #include <stack>
 #include <iostream>
+#include <chrono>
+
+
+using namespace std::chrono;
 
 RoutingProblem::RoutingProblem()
 {
@@ -40,6 +44,8 @@ std::vector<int> RoutingProblem::solve()
 
 std::vector<int> RoutingProblem::solve(Graph& g, graph_utils::GraphType type, int startId, int goalId, std::set<int> travelEdges)
 {
+
+    high_resolution_clock::time_point t1 = high_resolution_clock::now();
     
     _eulerianExtendedGraph = Graph(g);
 
@@ -68,6 +74,10 @@ std::vector<int> RoutingProblem::solve(Graph& g, graph_utils::GraphType type, in
 
     }
 
+
+    high_resolution_clock::time_point t2 = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>( t2 - t1 ).count();
+    std::cout<<"Eulerian solver took "<< duration << " microseconds"<<std::endl;
 
 
     return circuit;

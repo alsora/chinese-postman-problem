@@ -4,7 +4,6 @@
 #include "branch_bound.h"
 #include <queue>
 
-
 namespace eulerian_extension
 {
 
@@ -20,19 +19,17 @@ namespace eulerian_extension
         }
         else {
 
-            std::set<int> otps = eulerian_extension::ruralSolver(&graph, travelEdges, type);
+            if (type == graph_utils::MIXED){
 
-            graph_utils::refineEdges(&graph, otps);
+            }
+            else {
+                std::set<int> otps = eulerian_extension::ruralSolver(&graph, travelEdges, type);
 
-        }
-
-        if (type == graph_utils::MIXED  && travelEdges.empty()){
-            std::cout<<"The graph is mixed"<<std::endl;
-
+                graph_utils::refineEdges(&graph, otps);
+            }
         }
 
         return graph;
-
 
     }
 
@@ -41,15 +38,15 @@ namespace eulerian_extension
     {
             
          if (type == graph_utils::DIRECTED){
-            std::cout<<"The graph is directed"<<std::endl;
 
             eulerian_extension::simmetryHeuristic(graph, travelEdges);
         }                
         else if (type == graph_utils::UNDIRECTED){
-            std::cout<<"The graph is undirected"<<std::endl;
-
             eulerian_extension::evenDegreeHeuristic(graph, travelEdges);
 
+        }
+        else if (type == graph_utils::MIXED){
+        
         }
 
     }
@@ -94,7 +91,7 @@ namespace eulerian_extension
 
         std::map<std::pair<int, int>, float> D;
         std::map<std::pair<int, int>, std::vector<int>> P;
-
+        
         shortest_paths::mapDijkstra(allEdgesGraph, oddDegreeVertices, oddDegreeVertices, &D, &P);
 
         for (unsigned i = 0; i < oddDegreeVertices.size(); i++){
@@ -105,23 +102,16 @@ namespace eulerian_extension
 
         std::vector<int> bestAssignment = network_flow::naivePairsAssignment(oddDegreeVertices, D);
 
-        for (int j = 1; j <= oddDegreeVertices.size()/2; j++){
-            int firstId = -1;
-            int secondId = -1;
-
-            for (int k = 0; k < oddDegreeVertices.size();k++){
-                int label = bestAssignment[k];
-                if (label == j && firstId == -1){
-                    firstId = k; 
-                }
-                else if (label == j && secondId == -1){
-                    secondId = k;
-                }
-            }
+        for (int j = 0; j < bestAssignment.size(); j += 2){
+            
+            int firstElement = bestAssignment[j];
+            int firstId = oddDegreeVertices[firstElement];
+            int secondElement = bestAssignment[j + 1];
+            int secondId = oddDegreeVertices[secondElement];
 
             assert (firstId >= 0 && secondId >= 0);
 
-            std::vector<int> path = P[std::make_pair(oddDegreeVertices[firstId], oddDegreeVertices[secondId])];
+            std::vector<int> path = P[std::make_pair(firstId, secondId)];
 
             for (int eId : path){
                 Graph::Edge* e = graph->edge(eId);
@@ -138,7 +128,6 @@ namespace eulerian_extension
 
     std::map<int, int> simmetryHeuristic(Graph* graph, std::set<int> notRequiredEdges)
     {
-
 
         std::vector<int> verticesID;
         std::map<int, int> addedEdges;

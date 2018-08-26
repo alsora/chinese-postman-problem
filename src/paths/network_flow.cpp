@@ -240,7 +240,7 @@ namespace network_flow
 
 	std::vector<int> naivePairsAssignment(std::vector<int> elements, std::map<std::pair<int, int>, float> distanceMap)
 	{
-		
+
 
 		std::vector<std::vector<int>> perms = allAssignments(elements.size(), 2);
 
