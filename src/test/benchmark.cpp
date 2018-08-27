@@ -14,7 +14,7 @@ int main()
 {
 
 
-    int num_tests = 10000;
+    int num_tests = 2500;
 
     std::vector<int> vals;
 
@@ -23,7 +23,7 @@ int main()
     Graph graph;
     std::set<int> eset;
 
-    for (int i = 0; i < num_tests; i ++){
+    while (vals.size() < num_tests){
 
         std::pair<Graph, std::set<int>> res = buildRandomGraph();
         graph = res.first;
@@ -31,10 +31,10 @@ int main()
 
         std::vector<std::vector<int>> connectedComponents = graph_utils::tarjanConnectedComponents(graph);
         if (connectedComponents.size() != 1){
-            std::cout<<"Error: "<<connectedComponents.size()<<std::endl;
+            //std::cout<<"Error: "<<connectedComponents.size()<<std::endl;
             continue;
         }
-
+        
         int startId = 2;
         int goalId = 2;
 

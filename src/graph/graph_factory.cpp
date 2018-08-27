@@ -56,10 +56,10 @@ std::pair<Graph, std::set<int>> buildRandomGraph()
 
     Graph graph;
 
-    int nVertices = 25;
-    int nEdges =35;
+    int nVertices = 20;
+    int nEdges =40;
     int nVisited = 0;
-    bool undirected = true;
+    bool undirected = false;
 
 
 
