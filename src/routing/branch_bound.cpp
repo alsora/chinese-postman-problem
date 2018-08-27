@@ -7,14 +7,13 @@ BranchNBoundStruct::BranchNBoundStruct()
 }
 
 
-BranchNBoundStruct::BranchNBoundStruct(Graph graph, std::set<int> remainedElements)
+BranchNBoundStruct::BranchNBoundStruct(Graph g, std::set<int> elements)
 {
 
-	this->graph = graph;
-	this->circuit = std::vector<int>();
-	this->cost = -1;
-	this->remainedElements = remainedElements;
+	graph = g;
+	remainedElements = elements;
 
+	cost = -1;
 }
 
 /*
@@ -32,5 +31,14 @@ BranchNBoundStruct & BranchNBoundStruct::operator=(const BranchNBoundStruct & ot
 
 
 	return *this;
+}
+*/
+
+/*
+bool BranchNBoundStruct::LowerCostOtp(const int& lhs, const int& rhs) const
+{
+
+	return graph.edge(lhs)->cost() < graph.edge(rhs)->cost();
+
 }
 */

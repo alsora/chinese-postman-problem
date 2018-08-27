@@ -24,7 +24,6 @@ namespace eulerian_extension
             }
             else {
                 std::set<int> otps = eulerian_extension::ruralSolver(&graph, travelEdges, type);
-
                 graph_utils::refineEdges(&graph, otps);
             }
         }
@@ -167,29 +166,30 @@ namespace eulerian_extension
         Graph g2 = *graph;
         Graph g3 = *graph;
 
-
         //Loop on original edges, since I'm adding edges in g2. quadruplicate edges and add arcs to directed elements
-        for (Graph::EdgeIDMap::iterator it = graph->edges().begin(); it != graph->edges().end(); it++) {
-            Graph::Edge* e =it->second;
+        for (Graph::EdgeIDMap::iterator itEdge = graph->edges().begin(); itEdge != graph->edges().end(); itEdge++) {
+            Graph::Edge* e =itEdge->second;
+            int edgeId = itEdge->first;
+            
             if (!e->undirected()) {
-                directedElements.push_back(e->id());
+                directedElements.push_back(edgeId);
                 continue;
             }
                 
-            Graph::Vertex* vFrom = g3.vertex(e->from()->id());
-            Graph::Vertex* vTo = g3.vertex(e->to()->id());
+            int fromId = e->from()->id();
+            int toId = e->to()->id();
             //Substitute old edge with 2 pairs of arcs
             Graph::Edge* newArc;
 
-            newArc = g3.addEdge(vFrom, vTo, false, e->cost(), e->capacity());
-            newArc->setParentId(e->id());
-            newArc = g3.addEdge(vTo, vFrom, false, e->cost(), e->capacity());
-            newArc->setParentId(e->id());
-            newArc = g3.addEdge(vFrom, vTo, false, 0.0, 1);
-            newArc->setParentId(e->id());
-            newArc = g3.addEdge(vTo, vFrom, false, 0.0, 1);
-            newArc->setParentId(e->id());
-            g3.removeEdge(g3.edge(e->id()));
+            newArc = g3.addEdge(fromId, toId, false, e->cost(), e->capacity());
+            newArc->setParentId(edgeId);
+            newArc = g3.addEdge(toId, fromId, false, e->cost(), e->capacity());
+            newArc->setParentId(edgeId);
+            newArc = g3.addEdge(fromId, toId, false, 0.0, 1);
+            newArc->setParentId(edgeId);
+            newArc = g3.addEdge(toId, fromId, false, 0.0, 1);
+            newArc->setParentId(edgeId);
+            g3.removeEdge(g3.edge(edgeId));
         }
 
         
@@ -205,10 +205,10 @@ namespace eulerian_extension
             if (countCopies == 1 && e->cost() == 0 && e->capacity() == 1) {
                 //Check that I have not used the opposite direction 0 cost edge
                 bool oppositeDirection = false;
-                for (std::map<int, int>::iterator it = newEdges.begin(); it != newEdges.end(); it++) {
-                    Graph::Edge* e2 = g3.edge(it->first);
+                for (std::map<int, int>::iterator itEdge = newEdges.begin(); itEdge != newEdges.end(); itEdge++) {
+                    Graph::Edge* e2 = g3.edge(itEdge->first);
 
-                    if (it->second != 1 || e2->parentId() != e->parentId() || e2->cost() != 0 || e2->capacity() != 1)
+                    if (itEdge->second != 1 || e2->parentId() != e->parentId() || e2->cost() != 0 || e2->capacity() != 1)
                         continue;
 
                     if (e2->from()->id() == e->to()->id() && e2->to()->id() == e->from()->id()) {
@@ -249,7 +249,7 @@ namespace eulerian_extension
         for (Graph::EdgeIDMap::iterator it = g2.edges().begin(); it != g2.edges().end(); it++) {
             Graph::Edge* e = it->second;
             if (e->undirected()) {
-                undirectedElements.push_back(e->id());
+                undirectedElements.push_back(it->first);
             }
 
         }
@@ -278,10 +278,10 @@ namespace eulerian_extension
         for (Graph::VertexIDMap::const_iterator itVertices = graph->vertices().begin(); itVertices != graph->vertices().end(); itVertices++) {
             bool incidentToRequired = false;
             bool incidentToVisited = false;
-            Graph::Vertex* v = dynamic_cast<Graph::Vertex*>(itVertices->second);
+            Graph::Vertex* v = itVertices->second;
 
             for (Graph::EdgeSet::iterator itEdges = v->edges().begin(); itEdges != v->edges().end(); itEdges++) {
-                Graph::Edge* e = dynamic_cast<Graph::Edge*>(*itEdges);
+                Graph::Edge* e = *itEdges;
 
                 if (notRequiredEdges.find(e->id()) != notRequiredEdges.end())
                     incidentToVisited = true;
@@ -302,30 +302,27 @@ namespace eulerian_extension
 
         }
 
-        std::map<std::pair<int, int>, float> D;
-        std::map<std::pair<int, int>, std::vector<int>> P;
+        std::map<std::pair<int, int>, float> shortestPathsD;
+        std::map<std::pair<int, int>, std::vector<int>> optimalTravelPaths;
 
         //Compute all shortest paths between border vertices
-        shortest_paths::mapDijkstra(*graph, borderVertices, borderVertices, &D, &P);
+        shortest_paths::mapDijkstra(*graph, borderVertices, borderVertices, &shortestPathsD, &optimalTravelPaths);
 
-
-        std::map<std::pair<int, int>, std::vector<int>> optimalTravelPaths = P;
-        std::map<std::pair<int, int>, float> shortestPathsD = D;
         //Remove paths containing not only visited edges
         for (int fromId : borderVertices) {
             for (int toId : borderVertices) {
 
                 if (fromId == toId) {
-                    optimalTravelPaths.at(std::make_pair(fromId, toId)).clear();
+                    optimalTravelPaths.erase(std::make_pair(fromId, toId));
                     shortestPathsD.at(std::make_pair(fromId, toId)) = std::numeric_limits<float>::infinity();
                     continue;
                 }
 
-                std::vector<int> path = P.at(std::make_pair(fromId, toId));
+                std::vector<int> path = optimalTravelPaths.at(std::make_pair(fromId, toId));
                 for (unsigned i = 0; i < path.size(); i++) {
 
                     if (notRequiredEdges.find(path[i]) != notRequiredEdges.end()){
-                        optimalTravelPaths.at(std::make_pair(fromId, toId)).clear();
+                        optimalTravelPaths.erase(std::make_pair(fromId, toId));
                         shortestPathsD.at(std::make_pair(fromId, toId)) = std::numeric_limits<float>::infinity();
                         break;
                     }
@@ -341,28 +338,32 @@ namespace eulerian_extension
         bool undirected = type == graph_utils::UNDIRECTED;
         //Add artificial OTPs edges
         for (std::map<std::pair<int, int>, std::vector<int>>::const_iterator it = optimalTravelPaths.begin(); it != optimalTravelPaths.end(); it++) {
+            
+            std::vector<int> path = it->second;
 
-            if ((it->second).empty())
+            if (path.empty()){
                 continue;
+            }
 
             int fromId = it->first.first;
             int toId = it->first.second;
 
-            Graph::Vertex* vFrom = optimalGraph.vertex(fromId);
-            Graph::Vertex* vTo = optimalGraph.vertex(toId);
+            Graph::Edge* optEdge = optimalGraph.addEdge(fromId, toId, undirected, 0);
 
-            Graph::Edge* optEdge = optimalGraph.addEdge(vFrom, vTo, undirected, 0);
+            /* FOR SOME REASON I CAN'T REDUCE THE PROBLEM
+            for (int edgeId : path){
+                optimalGraph.removeEdge(optimalGraph.edge(edgeId));
+            }
+            */
 
             otpEdges.insert(optEdge->id());
             notRequiredEdges.insert(optEdge->id());
 
         }
 
-        BranchNBoundStruct lowerBound = BranchNBoundStruct(optimalGraph, otpEdges);
-
         std::priority_queue<BranchNBoundStruct, std::vector<BranchNBoundStruct>, std::greater<BranchNBoundStruct>> pq;
 
-        pq.push(lowerBound);
+        pq.push(BranchNBoundStruct(optimalGraph, otpEdges));
 
         while (!pq.empty()) {
             //Extract top (lower cost) element from the priority queue
@@ -377,7 +378,6 @@ namespace eulerian_extension
 
             int branchEdgeId = Graph::UnassignedId;
             float realCost =  0;
-
             for (int edgeId : currentStruct.remainedElements) {
 
                 Graph::Edge* e = currentStruct.graph.edge(edgeId);
@@ -402,7 +402,7 @@ namespace eulerian_extension
             g = structA.graph;
             heuristicExtension(&g, type, notRequiredEdges);
 
-            structA.cost = graph_utils::eulerianCost(structA.graph);
+            structA.cost = graph_utils::eulerianCost(g);
             pq.push(structA);
 
             BranchNBoundStruct structB = currentStruct;
@@ -412,7 +412,7 @@ namespace eulerian_extension
             g = structB.graph;
             heuristicExtension(&g, type, notRequiredEdges);
 
-            structB.cost = graph_utils::eulerianCost(structB.graph);
+            structB.cost = graph_utils::eulerianCost(g);
             pq.push(structB);
 
         }

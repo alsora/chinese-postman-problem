@@ -63,7 +63,7 @@ std::vector<int> RoutingProblem::solve(Graph& g, graph_utils::GraphType type, in
         Graph::Vertex* v = g.vertex(1);
 
         for (auto it = g.vertex(startId)->edges().begin(); it != g.vertex(startId)->edges().end(); it++) {
-            Graph::Edge* e = dynamic_cast<Graph::Edge*> (*it);
+            Graph::Edge* e = *it;
 
             if (e->from()->id() == startId || e->undirected()) {
                 if (e->cost() < lowerCost) {

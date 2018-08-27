@@ -305,8 +305,13 @@ bool Graph::removeVertex(Graph::Vertex* v)
 
 }
 
+
 bool Graph::removeEdge(Graph::Edge* e)
 {
+
+    if (e == nullptr){
+        return false;
+    }
 
     Graph::EdgeIDMap::iterator it = _edges.find(e->id());
 

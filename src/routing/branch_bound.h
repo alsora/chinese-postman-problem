@@ -4,24 +4,16 @@
 
 #include "graph/graph.h"
 
-
 struct BranchNBoundStruct
 {
 	Graph graph;
 	std::set<int> remainedElements;
-	std::vector<int> circuit;
 	float cost;
 
 	//Default constructor
 	BranchNBoundStruct();
 	//Constructor
 	BranchNBoundStruct(Graph graph, std::set<int> remainedElements);
-	//Copy constructor
-	//BranchNBoundStruct(const BranchNBoundStruct& other);
-	//Assignement operator
-	//BranchNBoundStruct& BranchNBoundStruct::operator=(const BranchNBoundStruct& other);
-	//Destructor
-	//~BranchNBoundStruct();
 
 };
 
@@ -32,8 +24,6 @@ inline bool operator >(const BranchNBoundStruct &A, const BranchNBoundStruct& B)
 	}
 	else return false;
 }
-
-
 
 
 

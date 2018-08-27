@@ -20,8 +20,7 @@ namespace graph_utils {
 
 
     std::vector<std::vector<int>> tarjanConnectedComponents(Graph graph);
-
-    void tarjanConnectedComponentsRecursion(Graph graph, int vertexID, std::map<int, int>* discoveryTime, std::map<int, int>* lowIndices, std::stack<int>* connectedAncestors, std::map<int, bool>* markedVertices, int* time, std::vector<std::vector<int>>* connectedComponents);
+    void tarjanConnectedComponentsRecursion(Graph graph, int vertexID, std::map<int, int>* discoveryStep, std::map<int, int>* lowIndices, std::stack<int>* connectedAncestors, std::map<int, bool>* markedVertices, int* step, std::vector<std::vector<int>>* connectedComponents);
 
 
     void printVerticesInfo(Graph graph);

@@ -122,16 +122,16 @@ namespace graph_utils
 std::vector<std::vector<int>> tarjanConnectedComponents(Graph graph)
 {
 
-	std::map<int, int> discoveryTime;
+	std::map<int, int> discoveryStep;
 	std::map<int, int> lowIndices;
 	std::map<int, bool> markedVertices;
 	std::stack<int> connectedAncestors;
 	std::vector<std::vector<int>> connectedComponents;
 
-	int time = 0;
+	int step = 0;
 
 	for (Graph::VertexIDMap::iterator it = graph.vertices().begin(); it != graph.vertices().end(); it++) {
-		discoveryTime.insert(std::pair<int, int>(it->first, -1));
+		discoveryStep.insert(std::pair<int, int>(it->first, -1));
 		lowIndices.insert(std::pair<int, int>(it->first, -1));
 		markedVertices.insert(std::pair<int, bool>(it->first, false));
 
@@ -139,8 +139,8 @@ std::vector<std::vector<int>> tarjanConnectedComponents(Graph graph)
 
 
 	for (Graph::VertexIDMap::iterator it = graph.vertices().begin(); it != graph.vertices().end(); it++) {
-		if (discoveryTime.at(it->first) == -1)
-			tarjanConnectedComponentsRecursion(graph, it->first, &discoveryTime, &lowIndices, &connectedAncestors, &markedVertices, &time, &connectedComponents);
+		if (discoveryStep.at(it->first) == -1)
+			tarjanConnectedComponentsRecursion(graph, it->first, &discoveryStep, &lowIndices, &connectedAncestors, &markedVertices, &step, &connectedComponents);
 	}
 
 
@@ -150,10 +150,10 @@ std::vector<std::vector<int>> tarjanConnectedComponents(Graph graph)
 }
 
 
-void tarjanConnectedComponentsRecursion(Graph graph, int vertexID, std::map<int, int>* discoveryTime, std::map<int, int>* lowIndices, std::stack<int>* connectedAncestors, std::map<int, bool>* markedVertices, int* time, std::vector<std::vector<int>>* connectedComponents)
+void tarjanConnectedComponentsRecursion(Graph graph, int vertexID, std::map<int, int>* discoveryStep, std::map<int, int>* lowIndices, std::stack<int>* connectedAncestors, std::map<int, bool>* markedVertices, int* step, std::vector<std::vector<int>>* connectedComponents)
 {
 
-	discoveryTime->at(vertexID) = lowIndices->at(vertexID) = (*time)++;
+	discoveryStep->at(vertexID) = lowIndices->at(vertexID) = (*step)++;
 	connectedAncestors->push(vertexID);
 	markedVertices->at(vertexID) = true;
 
@@ -168,20 +168,20 @@ void tarjanConnectedComponentsRecursion(Graph graph, int vertexID, std::map<int,
 		else
 			vertexAdjacentID = (*it)->to()->id();
 
-		if (discoveryTime->at(vertexAdjacentID) == -1) {
+		if (discoveryStep->at(vertexAdjacentID) == -1) {
 
-			tarjanConnectedComponentsRecursion(graph, vertexAdjacentID, discoveryTime, lowIndices, connectedAncestors, markedVertices, time, connectedComponents);
+			tarjanConnectedComponentsRecursion(graph, vertexAdjacentID, discoveryStep, lowIndices, connectedAncestors, markedVertices, step, connectedComponents);
 			lowIndices->at(vertexID) = std::min(lowIndices->at(vertexID), lowIndices->at(vertexAdjacentID));
 		}
 
 		else if (markedVertices->at(vertexAdjacentID) == true) {
-			lowIndices->at(vertexID) = std::min(lowIndices->at(vertexID), discoveryTime->at(vertexAdjacentID));
+			lowIndices->at(vertexID) = std::min(lowIndices->at(vertexID), discoveryStep->at(vertexAdjacentID));
 		}
 	}
 
 
 	int w = 0;
-	if (lowIndices->at(vertexID) == discoveryTime->at(vertexID)) {
+	if (lowIndices->at(vertexID) == discoveryStep->at(vertexID)) {
 		while (connectedAncestors->top() != vertexID) {
 			w = connectedAncestors->top();
 			markedVertices->at(w) = false;

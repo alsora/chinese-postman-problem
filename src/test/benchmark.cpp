@@ -5,7 +5,9 @@
 #include "graph/graph_utils.h"
 #include "utilities.h"
 #include <chrono>
+#include <queue>
 
+/*
 
 using namespace std::chrono;
 using namespace Eigen;
@@ -62,4 +64,18 @@ int main()
 
     std::cout<<"Mean: "<< mean <<" std_dev: "<<std<<std::endl;
 
+}
+
+*/
+
+
+bool Compare(int a, int b)
+{
+    return a < b;
+}
+
+int main()
+{
+    std::priority_queue<int, std::vector<int>, std::function<bool(int, int)>> pq(Compare);
+    return 0;
 }
