@@ -86,16 +86,22 @@ namespace eulerian_extension
 
         std::map<std::pair<int, int>, float> D;
         std::map<std::pair<int, int>, std::vector<int>> P;
-        
-        shortest_paths::mapDijkstra(allEdgesGraph, oddDegreeVertices, oddDegreeVertices, &D, &P);
 
-        for (unsigned i = 0; i < oddDegreeVertices.size(); i++){
-            int vId = oddDegreeVertices[i];
+
+        std::vector<int> verticesVector;
+        for (auto va = allEdgesGraph.vertices().begin(); va != allEdgesGraph.vertices().end(); va++){
+            verticesVector.push_back(va->first);
+        }
+
+        shortest_paths::mapFloydWarshall(allEdgesGraph, verticesVector ,&D, &P);
+        //shortest_paths::mapDijkstra(allEdgesGraph, oddDegreeVertices, oddDegreeVertices, &D, &P);
+
+        for (int vId : oddDegreeVertices){
             D[std::make_pair(vId, vId)] = std::numeric_limits<float>::infinity(); 
         }
 
-
         std::vector<int> bestAssignment = network_flow::naivePairsAssignment(oddDegreeVertices, D);
+
 
         for (int j = 0; j < bestAssignment.size(); j += 2){
             

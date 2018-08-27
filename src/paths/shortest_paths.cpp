@@ -96,7 +96,6 @@ namespace shortest_paths
                 if (path.empty() && startId != endId){
                     cost = numeric_limits<float>::infinity();
                 }
-                
                 (*D)[make_pair(startId, endId)] = cost;
                 (*P)[make_pair(startId, endId)] = path;
 
@@ -156,6 +155,119 @@ namespace shortest_paths
 
     }
 
+
+
+    void mapFloydWarshall(Graph graph, std::vector<int> verticesID, std::map<std::pair<int,int>, float>* D2, std::map<std::pair<int, int>, std::vector<int>>* H2)
+    {
+
+        float inf = std::numeric_limits<float>::infinity();
+
+        std::vector<std::vector<float>> D;
+        std::vector<std::vector<int>> H;
+
+        //Initialize distance map to infinite
+        D = std::vector<std::vector<float>>(verticesID.size(), vector<float>(verticesID.size(), inf));
+        H = std::vector<std::vector<int>>(verticesID.size(), vector<int>(verticesID.size(), Graph::UnassignedId));
+
+        //Set values for existing edges
+        for (auto it = graph.edges().begin(); it != graph.edges().end(); it++) {
+
+            Graph::Edge* e = it->second;
+
+            int fromID = e->from()->id();
+            int toID = e->to()->id();
+
+            ptrdiff_t fromPos = find(verticesID.begin(), verticesID.end(), fromID) - verticesID.begin();
+            ptrdiff_t toPos = find(verticesID.begin(), verticesID.end(), toID) - verticesID.begin();
+
+            D[fromPos][toPos] = e->cost();
+            H[fromPos][toPos] = it->first;
+
+            if (e->undirected()) {
+                D[toPos][fromPos] = e->cost();
+                H[toPos][fromPos] = it->first;
+            }
+
+        }
+        //Set value from a node to itself
+        for (unsigned i = 0; i < verticesID.size(); i++) {
+            D[i][i] = 0;
+        }
+
+        //Floyd Warshall algorithm
+        for (unsigned k = 0; k < verticesID.size(); k++) {
+            for (unsigned i = 0; i < verticesID.size(); i++) {
+                for (unsigned j = 0; j < verticesID.size(); j++) {
+
+                    if ((D[k][j] != inf) && (D[j][i] != inf) && (D[j][j] < 0)) {
+                        D[k][i] = -inf;
+                        continue;
+                    }
+
+                    if ((D[i][k] + D[k][j]) < D[i][j]) {
+                        D[i][j] = D[i][k] + D[k][j];
+                        H[i][j] = H[k][j];
+                    }
+
+                }
+            }
+        }
+
+
+        for (int i = 0; i < verticesID.size(); i ++){
+            for (int j = 0; j < verticesID.size();j++){
+
+
+                int fromID = verticesID[i];
+                int toID = verticesID[j];
+
+
+                if (i == j){
+                    (*H2)[std::make_pair(fromID, toID)] = std::vector<int>();
+                    (*D2)[std::make_pair(fromID, toID)] = 0;
+                    continue;
+                }
+
+                int fromPos = i;
+                int toPos = j;
+                
+                (*D2)[std::make_pair(fromID, toID)] = D[i][j];
+
+                std::vector<int> path;
+                int predecessorID = Graph::UnassignedId;
+                int successiveID = Graph::UnassignedId;
+                int predecessorEdgeHash;
+
+                while (predecessorID != fromID) {
+
+                    predecessorEdgeHash = H[fromPos][toPos];
+
+                    Graph::Edge* e = graph.edge(predecessorEdgeHash);
+
+                    if (!e->undirected() || (e->to()->id() == predecessorID) || (e->to()->id() == toID)) {
+                        predecessorID = e->from()->id();
+                        successiveID = e->to()->id();
+                    }
+                    else {
+                        predecessorID = e->to()->id();
+                        successiveID = e->from()->id();
+                    }
+
+                    toPos = find(verticesID.begin(), verticesID.end(), predecessorID) - verticesID.begin();
+
+                    path.push_back(predecessorEdgeHash);
+
+                }
+
+                std::reverse(path.begin(), path.end());
+
+                (*H2)[std::make_pair(fromID, toID)] = path;
+
+            }
+        }
+    
+
+    }
 
 
 
