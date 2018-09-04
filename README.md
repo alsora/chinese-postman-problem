@@ -50,8 +50,8 @@ Here you can find a reference to the theory behind the CPP and its solvers imple
 
 |   | Directed | Undirected | Mixed |
 | ------------- | ------------- | ------------- |------------- |
-| **Standard**  | Simmetry Heuristic | Even Degree Heuristic | Mixed Approach 3/2|
-| **Rural**  | Branch & Bound  | Branch & Bound | Minimum Spanning Tree|
+| **Standard**  | [Simmetry Heuristic](https://www3.cs.stonybrook.edu/~algorith/implement/cpp/distrib/SPAEcpp.pdf) | [Even Degree Heuristic](http://web.mit.edu/urban_or_book/www/book/chapter6/6.4.2.html) | [Mixed Approach 3/2](https://pdfs.semanticscholar.org/bbbe/3546347a4a15cb6b51a6fbaf6cec4cc1ad17.pdf)|
+| **Rural**  | [Branch & Bound](http://www.roboticsproceedings.org/rss06/p21.pdf)  | [Branch & Bound](http://www.roboticsproceedings.org/rss06/p21.pdf) | [Minimum Spanning Tree](https://www.ri.cmu.edu/pub_files/2011/8/thesis_xu.pdf)|
 
 An open path between any two vertices can be computed adding an artificial edge between them.
 
