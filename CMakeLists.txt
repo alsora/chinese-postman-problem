@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(chinese_postman_problem)
+project(cpp_solver)
 
 set(CMAKE_BUILD_TYPE Release)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(EXECUTABLE_OUTPUT_PATH "../bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
 
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
@@ -18,56 +19,45 @@ if (OpenCV_FOUND)
 endif()
 
 
-include_directories(src)
+include_directories(src/cpp_solver)
 
-#MESSAGE( STATUS "variable is: " ${EIGEN3_INCLUDE_DIR} )
 
-set(CREATE_GRAPH_SRC 
-  src/graph/graph.cpp
-  src/graph/graph_utils.cpp
-  src/graph/graph_factory.cpp
-  src/paths/shortest_paths.cpp
-)
+add_subdirectory(src/cpp_solver)
+add_subdirectory(src/test)
 
-if (OpenCV_FOUND)
-  set (CREATE_GRAPH_SRC ${CREATE_GRAPH_SRC}
-    src/opencv_utilities.cpp
-  )
+
+if (ROS_CATKIN_MAKE)
+
+	add_subdirectory(src/ros_exploration_plugin)
+
+	## Find catkin macros and libraries
+	## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
+	## is used, also find other catkin packages
+	find_package(catkin REQUIRED COMPONENTS
+	  roscpp
+	  tf
+	  pluginlib
+	  geometry_msgs
+	  nav_msgs
+	  visualization_msgs
+	  nav2d_navigator
+	)
+
+	###################################
+	## catkin specific configuration ##
+	###################################
+
+	catkin_package(
+	  LIBRARIES ChinesePostmanProblemPlugin
+	  CATKIN_DEPENDS
+	    	roscpp
+		tf
+		pluginlib
+		geometry_msgs
+		nav_msgs
+		visualization_msgs
+		nav2d_navigator
+	)
+
 endif()
 
-add_executable(create_graph
-  src/test/create_graph.cpp
-  ${CREATE_GRAPH_SRC}
-)
-
-if (OpenCV_FOUND)
-  target_link_libraries(create_graph ${OpenCV_LIBS})
-endif()
-
-set (ROUTING_SRC ${CREATE_GRAPH_SRC}
-  src/routing/routing_problem.cpp
-  src/routing/eulerian_extension.cpp
-  src/routing/branch_bound.cpp
-  src/paths/network_flow.cpp
-  src/utilities.cpp
-)
-
-add_executable(routing
-  src/test/routing_test.cpp
-  ${ROUTING_SRC}
-)
-
-
-if (OpenCV_FOUND)
-  target_link_libraries(routing ${OpenCV_LIBS})
-endif()
-
-
-add_executable(benchmark
-  src/test/benchmark.cpp
-  ${ROUTING_SRC}
-)
-
-if (OpenCV_FOUND)
-  target_link_libraries(benchmark ${OpenCV_LIBS})
-endif()

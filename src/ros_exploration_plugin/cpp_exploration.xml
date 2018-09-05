@@ -1,0 +1,12 @@
+
+
+  <library path="libChinesePostmanProblemPlugin">
+
+    <class name="ChinesePostmanPlanner" type="ChinesePostmanPlanner" base_class_type="ExplorationPlanner">
+      <description>
+      ciao 
+      </description>
+    </class>
+    
+  </library>
+  

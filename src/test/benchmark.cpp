@@ -13,7 +13,7 @@ int main()
 {
 
 
-    int num_tests = 2500;
+    int num_tests = 1000;
 
     std::vector<int> vals;
 
@@ -27,12 +27,6 @@ int main()
         std::pair<Graph, std::set<int>> res = buildRandomGraph();
         graph = res.first;
         eset = res.second;
-
-        std::vector<std::vector<int>> connectedComponents = graph_utils::tarjanConnectedComponents(graph);
-        if (connectedComponents.size() != 1){
-            //std::cout<<"Error: "<<connectedComponents.size()<<std::endl;
-            continue;
-        }
         
         int startId = 2;
         int goalId = 2;
@@ -50,6 +44,10 @@ int main()
 
         high_resolution_clock::time_point t2 = high_resolution_clock::now();
         auto duration = duration_cast<microseconds>( t2 - t1 ).count();
+
+        if (duration > 1040597){
+            continue;
+        }
 
         vals.push_back(duration);
     }
