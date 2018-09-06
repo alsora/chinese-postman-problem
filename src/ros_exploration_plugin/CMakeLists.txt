@@ -1,47 +1,31 @@
-project(cpp_solver)
-
-  message(STATUS "dir='${PROJECT_NAME}'")
-
-
-
 
 ###########
 ## Build ##
 ###########
 
 include_directories(
-  src/
+  include/${PROJECT_NAME}/
   ${catkin_INCLUDE_DIRS}
 )
-
-get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-foreach(dir ${dirs})
-  message(STATUS "dir='${dir}'")
-endforeach()
-
-add_library(ChinesePostmanProblemPlugin
+add_library(CppExplorationPlugins
   src/ChinesePostmanPlanner.cpp
-  src/cpp_exploration_plugin.cpp
-  )
+  src/exploration_plugins.cpp)
 
+add_dependencies(CppExplorationPlugins ${catkin_EXPORTED_TARGETS})
 
-  message(STATUS "catkin_EXPORTED_TARGETS='${catkin_EXPORTED_TARGETS}'")
-
-add_dependencies(ChinesePostmanProblemPlugin ${catkin_EXPORTED_TARGETS})
-
-target_link_libraries(ChinesePostmanProblemPlugin cpp_solver_library ${catkin_LIBRARIES})
+target_link_libraries(CppExplorationPlugins cpp_solver_library ${catkin_LIBRARIES})
 
 
 #############
 ## Install ##
 #############
 
-install(TARGETS ChinesePostmanProblemPlugin
+install(TARGETS CppExplorationPlugins
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
 install(FILES
-  cpp_exploration.xml
+  exploration.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
@@ -50,7 +34,7 @@ install(FILES
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_cpp_exploration.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_nav2d_exploration.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

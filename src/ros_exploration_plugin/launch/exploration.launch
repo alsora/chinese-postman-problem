@@ -1,0 +1,50 @@
+<launch>
+
+	<!-- Some general parameters -->
+	<param name="use_sim_time" value="true" />
+	<rosparam file="$(find cpp_solver)/src/ros_exploration_plugin/param/ros.yaml"/>
+
+	<!-- Start Stage simulator with a given environment -->
+	<node name="Stage" pkg="stage_ros" type="stageros" args="$(find cpp_solver)/src/ros_exploration_plugin/world/tutorial.world">
+		<param name="base_watchdog_timeout" value="0" />
+	</node>
+
+	<!-- Start map_server to display the full map -->
+  	<arg name="map_file" default="$(find cpp_solver)/src/ros_exploration_plugin/world/autolab.yaml"/>
+	<node name="map_server" pkg="map_server" type="map_server"  args="$(arg map_file)" >
+		<remap from="map" to="world"/>
+		<remap from="map_metadata" to="world_metadata"/>
+		<remap from="static_map" to="static_world"/>
+	</node>
+
+
+	<!-- Start the Operator to control the simulated robot -->
+	<node name="Operator" pkg="nav2d_operator" type="operator" >
+		<remap from="scan" to="base_scan"/>
+		<rosparam file="$(find cpp_solver)/src/ros_exploration_plugin/param/operator.yaml"/>
+		<rosparam file="$(find cpp_solver)/src/ros_exploration_plugin/param/costmap.yaml" ns="local_map" />
+	</node>
+
+	<!-- Start Mapper to genreate map from laser scans -->
+	<node name="Mapper" pkg="nav2d_karto" type="mapper">
+		<remap from="scan" to="base_scan"/>
+		<rosparam file="$(find cpp_solver)/src/ros_exploration_plugin/param/mapper.yaml"/>
+	</node>
+
+	<!-- Start the Navigator to move the robot autonomously -->
+	<node name="Navigator" pkg="nav2d_navigator" type="navigator" output="screen">
+		<rosparam file="$(find cpp_solver)/src/ros_exploration_plugin/param/navigator.yaml"/>
+	</node>
+
+	<node name="GetMap" pkg="nav2d_navigator" type="get_map_client" />
+	<node name="Explore" pkg="nav2d_navigator" type="explore_client" />
+	<node name="SetGoal" pkg="nav2d_navigator" type="set_goal_client" />
+
+	<!-- Start the joystick-driver and remote-controller for operation-->
+	<node name="Joystick" pkg="joy" type="joy_node" />
+	<node name="Remote" pkg="nav2d_remote" type="remote_joy" />
+
+	<!-- RVIZ to view the visualization -->
+	<node name="RVIZ" pkg="rviz" type="rviz" args=" -d $(find cpp_solver)/src/ros_exploration_plugin/param/exploration.rviz" />
+
+</launch>

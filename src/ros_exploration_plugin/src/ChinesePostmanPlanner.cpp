@@ -6,7 +6,6 @@
 #include <iostream>
 #include <string> 
 #include <sstream>
-#include "graph/graph.h"
 
 typedef std::multimap<double,unsigned int> Queue;
 typedef std::pair<double,unsigned int> Entry;
@@ -36,9 +35,6 @@ void chatterCallback(const geometry_msgs::PointStamped::ConstPtr& msg)
 ChinesePostmanPlanner::ChinesePostmanPlanner()
 {	
 
-
-	Graph g;
-	
 	
 	goals_count = 0;
 	

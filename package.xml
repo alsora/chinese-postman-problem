@@ -29,7 +29,7 @@
   <run_depend>visualization_msgs</run_depend>
 
   <export>
-    <nav2d_navigator plugin="${prefix}/cpp_exploration.xml" />
+    <nav2d_navigator plugin="${prefix}/exploration.xml" />
   </export>
 
 </package>

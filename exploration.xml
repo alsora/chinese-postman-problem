@@ -1,12 +1,13 @@
 
 
-  <library path="libChinesePostmanProblemPlugin">
+  <library path="libCppExplorationPlugins">
 
     <class name="ChinesePostmanPlanner" type="ChinesePostmanPlanner" base_class_type="ExplorationPlanner">
       <description>
-      ciao 
+        Extends nearest-frontier to the multi-robot case by starting
+        synchronized wavefronts at each robots position.
       </description>
     </class>
-    
+
   </library>
   
