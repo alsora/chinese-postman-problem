@@ -26,10 +26,12 @@ Traversed edges are coloured in orange.
 
 ### Requirements
 
- - Eigen REQUIRED
- - OpenCV (only for visualization)
- - ROS kinetic (only for the ROS plugin)
- - Nav2d (only for the ROS plugin)
+The code has been developed and tested on Ubuntu 16.04
+
+ - [Eigen](https://eigen.tuxfamily.org/dox/GettingStarted.html) REQUIRED
+ - [OpenCV](https://docs.opencv.org/2.4/doc/tutorials/introduction/linux_install/linux_install.html) (only for visualization)
+ - [ROS kinetic](http://wiki.ros.org/kinetic/Installation/Ubuntu) (only for the ROS plugin)
+ - [Nav2d](http://wiki.ros.org/nav2d) (only for the ROS plugin)
 
 ### Instructions
 
