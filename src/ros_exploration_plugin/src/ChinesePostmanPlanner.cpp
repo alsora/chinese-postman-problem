@@ -53,7 +53,7 @@ ChinesePostmanPlanner::ChinesePostmanPlanner()
 
 	int i = 0;
 
-	while (i < 5)
+	while (i < 12)
 	{
 		spinOnce();
 
@@ -74,8 +74,9 @@ ChinesePostmanPlanner::ChinesePostmanPlanner()
 		points.color.g = 1.0f;
 		points.color.a = 1.0;
 		points.header.frame_id = "/map";
-		points.points.push_back(last_point);
-
+		geometry_msgs::Point contour_point = last_point;
+		contour_point.y += 0.1;
+		points.points.push_back(contour_point);
 
 		visualization_msgs::Marker text;
 		text.header.frame_id = "/map";
@@ -92,9 +93,9 @@ ChinesePostmanPlanner::ChinesePostmanPlanner()
 		unique_markers_id++;
 		text.id = unique_markers_id;
 
-		text.scale.x = 4;
-		text.scale.y = 4;
-		text.scale.z = 1;
+		text.scale.x = 1;
+		text.scale.y = 1;
+		text.scale.z = 0.75;
 
 		text.color.r = 0.0f;
 		text.color.g = 0.0f;

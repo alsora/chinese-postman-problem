@@ -6,21 +6,13 @@ Chinese Postman Problem solver library.
 This repository contains a library which allows to create traversable graph structures.
 The shortest route which visits all the edges of the graph is computed solving a Chinese Postman Problem.
 
-This library is used to create a ROS exploration plugin for the Nav2d ROS package.
-This plugin allows the user to draw a graph on Rviz.
-Then it's possible to explore it while building a map of the environment using the Nav2d SLAM algorithms.
-
-Compute Eulerian circuits and paths to traverse graph structures.
-
-ROS implementation for autonomous robotic exploration and navigation.
-
-
 ![eulerian circuit animation](https://github.com/alsora/chinese-postman-problem/blob/master/routing.gif)
 
-Animation of the Eulerian circuit computed on a simple directed graph.
-Traversed edges are coloured in orange.
+This library is used to create a ROS exploration plugin for the Nav2d ROS package.
+This plugin allows the user to draw a graph on Rviz.
+Then it's possible to autonomously explore it while building a map of the environment using the Nav2d SLAM algorithms.
 
-
+![graph rviz](https://github.com/alsora/chinese-postman-problem/blob/master/cpp_ros.png)
 
 ## Build
 

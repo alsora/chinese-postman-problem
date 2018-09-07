@@ -63,18 +63,98 @@ Visualization Manager:
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
-      Enabled: false
+      Enabled: true
       Links:
         All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        back_sonar:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        front_sonar:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        p3at_back_left_axle:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        p3at_back_left_hub:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        p3at_back_left_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        p3at_back_right_axle:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        p3at_back_right_hub:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        p3at_back_right_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        p3at_front_left_axle:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        p3at_front_left_hub:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        p3at_front_left_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        p3at_front_right_axle:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        p3at_front_right_hub:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        p3at_front_right_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        top_plate:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
       Update Interval: 0
-      Value: false
+      Value: true
       Visual Enabled: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
@@ -144,17 +224,47 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
+        back_sonar:
+          Value: true
         base_footprint:
           Value: true
         base_laser_link:
           Value: true
         base_link:
           Value: true
+        front_sonar:
+          Value: true
         map:
           Value: true
         odom:
           Value: true
         offset:
+          Value: true
+        p3at_back_left_axle:
+          Value: true
+        p3at_back_left_hub:
+          Value: true
+        p3at_back_left_wheel:
+          Value: true
+        p3at_back_right_axle:
+          Value: true
+        p3at_back_right_hub:
+          Value: true
+        p3at_back_right_wheel:
+          Value: true
+        p3at_front_left_axle:
+          Value: true
+        p3at_front_left_hub:
+          Value: true
+        p3at_front_left_wheel:
+          Value: true
+        p3at_front_right_axle:
+          Value: true
+        p3at_front_right_hub:
+          Value: true
+        p3at_front_right_wheel:
+          Value: true
+        top_plate:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -167,7 +277,29 @@ Visualization Manager:
             odom:
               base_footprint:
                 base_link:
+                  back_sonar:
+                    {}
                   base_laser_link:
+                    {}
+                  front_sonar:
+                    {}
+                  p3at_back_left_axle:
+                    p3at_back_left_hub:
+                      p3at_back_left_wheel:
+                        {}
+                  p3at_back_right_axle:
+                    p3at_back_right_hub:
+                      p3at_back_right_wheel:
+                        {}
+                  p3at_front_left_axle:
+                    p3at_front_left_hub:
+                      p3at_front_left_wheel:
+                        {}
+                  p3at_front_right_axle:
+                    p3at_front_right_hub:
+                      p3at_front_right_wheel:
+                        {}
+                  top_plate:
                     {}
       Update Interval: 0
       Value: true
@@ -186,7 +318,7 @@ Visualization Manager:
       Marker Topic: visualization_marker
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
   Enabled: true
