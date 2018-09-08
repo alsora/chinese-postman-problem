@@ -27,9 +27,15 @@ set(LIBRARY_SRC
 
 if (OpenCV_FOUND)
   set (LIBRARY_SRC ${LIBRARY_SRC}
-    opencv_utilities.cpp
+    visualization/opencv_utilities.cpp
   )
 endif()
+#
+#if (${ROS})
+#  set (LIBRARY_SRC ${LIBRARY_SRC}
+#    visualization/rviz_utilities.cpp
+#  )
+#endif()
 
 
 add_library(cpp_solver_library SHARED

@@ -5,7 +5,7 @@
 #include "graph/graph_factory.h"
 #ifdef OPENCV_LIBRARY_FOUND
 #include "opencv2/highgui/highgui.hpp"
-#include "opencv_utilities.h"
+#include "visualization/opencv_utilities.h"
 #endif
 
 

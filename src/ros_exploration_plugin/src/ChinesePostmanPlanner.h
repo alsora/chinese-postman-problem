@@ -2,6 +2,7 @@
 #define CHINESEPOSTMANPLANNER_H
 
 #include <nav2d_navigator/ExplorationPlanner.h>
+#include "graph/graph.h"
 
 class ChinesePostmanPlanner : public ExplorationPlanner
 {
@@ -13,11 +14,13 @@ class ChinesePostmanPlanner : public ExplorationPlanner
 
 	private:
 
-		std::vector<std::pair<double, double> > goals;
-		int c;
+		void drawVertex(int id);
+		void drawEdge(int Id);
+		int unique_markers_id;
 
 
-		int goals_count;
+		Graph _graph;
+
         ros::NodeHandle _nh;
         
 		ros::Publisher _pubMarkers;

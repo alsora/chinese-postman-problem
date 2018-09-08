@@ -6,6 +6,9 @@
 #include <iostream>
 #include <string> 
 #include <sstream>
+#include <eigen3/Eigen/Dense>
+
+
 
 typedef std::multimap<double,unsigned int> Queue;
 typedef std::pair<double,unsigned int> Entry;
@@ -18,13 +21,9 @@ using namespace ros;
 void chatterCallback(const geometry_msgs::PointStamped::ConstPtr& msg)
 {
 
-	double x = msg->point.x;
-	double y = msg->point.x;
-	double z = msg->point.z;
-
 	last_point = msg->point;
-
-	std::cout<<"I heard "<< x<<" " << y<<" " << z<<std::endl;
+	last_point.y -= 2;
+	std::cout<<"I heard "<< last_point.x<<" " << last_point.y <<std::endl;
 
 //  ROS_INFO("I heard: [%d %d %d]", x, y, z);
 	new_msg = true;
@@ -35,8 +34,7 @@ void chatterCallback(const geometry_msgs::PointStamped::ConstPtr& msg)
 ChinesePostmanPlanner::ChinesePostmanPlanner()
 {	
 
-	
-	goals_count = 0;
+	unique_markers_id = 0;
 	
 	_subMarkers = _nh.subscribe("clicked_point", 1000, chatterCallback);
 
@@ -47,67 +45,22 @@ ChinesePostmanPlanner::ChinesePostmanPlanner()
 
 	ROS_INFO("WAITING FOR POINTS TO BE PUBLISHED");	
 
-	int unique_markers_id = 0;
-	std::vector<geometry_msgs::Point> graph_vertices;
-
 
 	int i = 0;
 
-	while (i < 12)
+	while (i < 3)
 	{
 		spinOnce();
 
 		if (!new_msg){ continue;}
 
 		i++;
-		unique_markers_id++;
-		
-		graph_vertices.push_back(last_point);
+		_graph.addVertex(i, Eigen::Vector2f(last_point.x, last_point.y));
 
-		visualization_msgs::Marker points;
-		points.type = visualization_msgs::Marker::POINTS;
-		points.id = unique_markers_id;
-		// POINTS markers use x and y scale for width/height respectively
-		points.scale.x = 0.6;
-		points.scale.y = 0.6;
-		// Points are green
-		points.color.g = 1.0f;
-		points.color.a = 1.0;
-		points.header.frame_id = "/map";
-		geometry_msgs::Point contour_point = last_point;
-		contour_point.y += 0.1;
-		points.points.push_back(contour_point);
-
-		visualization_msgs::Marker text;
-		text.header.frame_id = "/map";
-		text.id = unique_markers_id;
-		text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
-
-		text.pose.position = last_point;
-		
-		std::stringstream ss;
-		ss << i;
-		text.text = ss.str();
-
-
-		unique_markers_id++;
-		text.id = unique_markers_id;
-
-		text.scale.x = 1;
-		text.scale.y = 1;
-		text.scale.z = 0.75;
-
-		text.color.r = 0.0f;
-		text.color.g = 0.0f;
-		text.color.b = 0.0f;
-		text.color.a = 1.0;
-
-		_pubMarkers.publish(text);
-		_pubMarkers.publish(points);
+		drawVertex(i);
 
 		new_msg = false;
 	
-
 	}
 
 	ROS_INFO("Graph's vertices created! Now define the edges");	
@@ -120,9 +73,6 @@ ChinesePostmanPlanner::ChinesePostmanPlanner()
 
 		getline (std::cin, text);
 		
-		std::cout<<"You typed: "<< text <<std::endl;
-
-
 		int n;
 		std::stringstream stream(text);
 		while(stream >> n){
@@ -137,41 +87,27 @@ ChinesePostmanPlanner::ChinesePostmanPlanner()
 			ROS_ERROR("You must write 2 numbers or \"-1 -1\" to stop.");	
 		}
 
-		int from = vertices_pair[0];
-		int to = vertices_pair[1];	
+		int fromId = vertices_pair[0];
+		int toId = vertices_pair[1];	
+		bool undirected = true;
 
-		if (from <= 0 && to <=0){
+
+		if (fromId <= 0 && toId <=0){
 			break;	
 		}
 
-		if (from > graph_vertices.size() || to > graph_vertices.size()){
-			ROS_ERROR("One of the entered id is not present in the graph.");
-			continue;	
-		}
+		Graph::Vertex* fromV = _graph.vertex(fromId);
+		Graph::Vertex* toV = _graph.vertex(toId);
 
-		if (from <= 0 || to <= 0){
-			ROS_ERROR("One of the entered id is negative.");
+
+		if (fromV == nullptr || toV == nullptr){
+			ROS_ERROR("One of the entered id is not present in the graph.");
 			continue;
 		}
 
-		bool undirected = true;
+		Graph::Edge* e = _graph.addEdge(fromId, toId, undirected);
 
-		unique_markers_id++;
-
-		visualization_msgs::Marker edge;
-		edge.type = visualization_msgs::Marker::ARROW;
-		edge.id = unique_markers_id;
-		edge.header.frame_id = "/map";
- 		edge.header.stamp = ros::Time::now();
-		edge.scale.x = 0.05;
-		edge.scale.y = 0.1;
-		edge.color.r = 1.0;
-		edge.color.a = 1.0;
-		edge.points.push_back(graph_vertices[from -1]);
-		edge.points.push_back(graph_vertices[to -1]);
-
-		_pubMarkers.publish(edge);
-
+		drawEdge(e->id());
 
 		ROS_INFO("Define another edge or write \"-1 -1\" to stop.");	
 
@@ -194,14 +130,14 @@ int ChinesePostmanPlanner::findExplorationTarget(GridMap* map, unsigned int star
 	ROS_INFO("THIS IS CPP PROBLEM");
 
 	/*
-	if (goals_count == 0){
+	while (!graph_vertices.empty()){
 
-
-		std::pair<double, double> new_goal = std::make_pair(-7.5, -7.5);
+		geometry_msgs::Point new_goal = graph_vertices.front();
+		graph_vertices.erase(graph_vertices.begin());
 
 		double resolution = map->getResolution();
 
-		std::pair<unsigned int, unsigned int> cells = std::make_pair(new_goal.first / resolution, new_goal.second / resolution);
+		std::pair<unsigned int, unsigned int> cells = std::make_pair(new_goal.x / resolution, new_goal.y / resolution);
 
 		unsigned int index;
 		
@@ -209,18 +145,27 @@ int ChinesePostmanPlanner::findExplorationTarget(GridMap* map, unsigned int star
 
 		goal = index;
 
-		goals_count++;
 		return EXPL_TARGET_SET;
-	}
-	else{
 
-		return EXPL_FINISHED;
 	}
+
+	return EXPL_FINISHED;
 	*/
 
+	
 	// Create some workspace for the wavefront algorithm
 	unsigned int mapSize = map->getSize();
 	double* plan = new double[mapSize];
+
+
+	std::cout<<"_---------------"<<std::endl;
+				unsigned int ax;
+			unsigned int ay;
+			map->getCoordinates(ax, ay, start);
+	std::cout<<"starting from "<< ax <<" "<<ay<<std::endl;
+	std::cout<<"MAP RESOLUTION----------> "<<map->getResolution()<<std::endl;
+
+
 	for(unsigned int i = 0; i < mapSize; i++)
 	{
 		plan[i] = -1;
@@ -255,9 +200,9 @@ int ChinesePostmanPlanner::findExplorationTarget(GridMap* map, unsigned int star
 			foundFrontier = true;
 			unsigned int x;
 			unsigned int y;
-			
 			map->getCoordinates(x, y, index);
-			
+			std::cout<<"MAP CELL ---> " << x <<" "<<y<< std::endl;
+
 			goal = index;
 			break;
 		}else
@@ -297,17 +242,6 @@ int ChinesePostmanPlanner::findExplorationTarget(GridMap* map, unsigned int star
 
 	ROS_DEBUG("Checked %d cells.", cellCount);	
 	delete[] plan;
-
-	if (goals_count == 0){
-
-		return EXPL_TARGET_SET;
-		goals_count ++;
-	
-	}
-	else {
-		return EXPL_FINISHED;
-	}
-	
 	if(foundFrontier)
 	{
 		return EXPL_FINISHED;
@@ -317,6 +251,118 @@ int ChinesePostmanPlanner::findExplorationTarget(GridMap* map, unsigned int star
 			return EXPL_FINISHED;
 		else
 			return EXPL_FAILED;
+	}
+
+	
+}
+
+
+
+
+
+void ChinesePostmanPlanner::drawVertex(int id)
+{
+
+		unique_markers_id++;
+
+		Eigen::Vector2f vPos = _graph.vertex(id)->position();
+		
+		visualization_msgs::Marker points;
+		points.type = visualization_msgs::Marker::POINTS;
+		points.id = unique_markers_id;
+		// POINTS markers use x and y scale for width/height respectively
+		points.scale.x = 0.6;
+		points.scale.y = 0.6;
+		// Points are green
+		points.color.g = 1.0f;
+		points.color.a = 1.0;
+		points.header.frame_id = "/map";
+		geometry_msgs::Point contour_point;
+		contour_point.x = vPos.x();
+		contour_point.y = vPos.y() + 2;
+
+		points.points.push_back(contour_point);
+
+		visualization_msgs::Marker text;
+		text.header.frame_id = "/map";
+		text.id = unique_markers_id;
+		text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+
+		text.pose.position = contour_point;
+		text.pose.position.y -= 0.1;
+
+		std::stringstream ss;
+		ss << _graph.vertices().size();
+		text.text = ss.str();
+
+
+		unique_markers_id++;
+		text.id = unique_markers_id;
+
+		text.scale.x = 1;
+		text.scale.y = 1;
+		text.scale.z = 0.75;
+
+		text.color.r = 0.0f;
+		text.color.g = 0.0f;
+		text.color.b = 0.0f;
+		text.color.a = 1.0;
+
+		_pubMarkers.publish(text);
+		_pubMarkers.publish(points);
+
+
+
+}
+
+void ChinesePostmanPlanner::drawEdge(int id)
+{
+
+	unique_markers_id++;
+
+	Graph::Edge* e = _graph.edge(id);
+
+	Graph::Vertex* fromV = e->from();
+	Graph::Vertex* toV = e->to();
+	bool undirected = e->undirected();
+
+	visualization_msgs::Marker edge;
+	edge.type = visualization_msgs::Marker::ARROW;
+	edge.id = unique_markers_id;
+	edge.header.frame_id = "/map";
+	edge.header.stamp = ros::Time::now();
+	edge.scale.x = 0.05;
+	edge.scale.y = 0.1;
+	edge.color.r = 1.0;
+	edge.color.a = 1.0;
+
+
+	Eigen::Vector2f fromPos = fromV->position();
+	Eigen::Vector2f toPos = toV->position();
+
+	geometry_msgs::Point fromPt;
+	geometry_msgs::Point toPt;
+
+	fromPt.x = fromPos.x();
+	fromPt.y = fromPos.y() + 2;
+
+	toPt.x = toPos.x();
+	toPt.y = toPos.y() + 2;
+
+	edge.points.push_back(fromPt);
+	edge.points.push_back(toPt);
+
+	_pubMarkers.publish(edge);
+
+	if (undirected){
+		unique_markers_id++;
+		visualization_msgs::Marker opposite_edge = edge;
+		opposite_edge.id = unique_markers_id;
+		opposite_edge.points.clear();
+		opposite_edge.points.push_back(toPt);
+		opposite_edge.points.push_back(fromPt);
+		_pubMarkers.publish(opposite_edge);
+
 	}
 
 

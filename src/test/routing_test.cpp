@@ -5,7 +5,7 @@
 #include "graph/graph_utils.h"
 #include "utilities.h"
 #ifdef OPENCV_LIBRARY_FOUND
-#include "opencv_utilities.h"
+#include "visualization/opencv_utilities.h"
 #endif
 using namespace Eigen;
 

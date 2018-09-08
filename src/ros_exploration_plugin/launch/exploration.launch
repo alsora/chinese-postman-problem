@@ -5,7 +5,7 @@
 	<rosparam file="$(find cpp_solver)/src/ros_exploration_plugin/param/ros.yaml"/>
 
 	<!-- Start Stage simulator with a given environment -->
-	<node name="Stage" pkg="stage_ros" type="stageros" args="$(find cpp_solver)/src/ros_exploration_plugin/world/tutorial.world">
+	<node name="Stage" pkg="stage_ros" type="stageros" args="$(find cpp_solver)/src/ros_exploration_plugin/world/autolab.world">
 		<param name="base_watchdog_timeout" value="0" />
 	</node>
 
