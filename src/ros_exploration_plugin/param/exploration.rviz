@@ -186,7 +186,7 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: false
       Value: true
-    - Alpha: 0.699999988
+    - Alpha: 0.899999976
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
@@ -303,12 +303,12 @@ Visualization Manager:
                     {}
       Update Interval: 0
       Value: true
-    - Alpha: 0.699999988
+    - Alpha: 0.600000024
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
       Enabled: true
-      Name: Map
+      Name: GroundTruthMap
       Topic: /world
       Unreliable: false
       Use Timestamp: false
@@ -355,7 +355,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Scale: 44.8788109
+      Scale: 47.5539551
       Target Frame: base_link
       Value: TopDownOrtho (rviz)
       X: 0

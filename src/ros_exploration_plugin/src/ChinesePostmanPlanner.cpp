@@ -22,6 +22,11 @@ void chatterCallback(const geometry_msgs::PointStamped::ConstPtr& msg)
 {
 
 	last_point = msg->point;
+		
+	//auto goal_x = ((new_goal.x() - map->getOriginX())/map->getResolution());
+	//auto goal_y = (((new_goal.y() + 2) - map->getOriginY())/map->getResolution());
+
+
 	last_point.y -= 2;
 	std::cout<<"I heard "<< last_point.x<<" " << last_point.y <<std::endl;
 
@@ -129,19 +134,24 @@ int ChinesePostmanPlanner::findExplorationTarget(GridMap* map, unsigned int star
 
 	ROS_INFO("THIS IS CPP PROBLEM");
 
-	/*
-	while (!graph_vertices.empty()){
+	for (int i = 1; i < _graph.vertices().size(); i++){
 
-		geometry_msgs::Point new_goal = graph_vertices.front();
-		graph_vertices.erase(graph_vertices.begin());
+		Eigen::Vector2f new_goal = _graph.vertex(i)->position();
 
 		double resolution = map->getResolution();
 
-		std::pair<unsigned int, unsigned int> cells = std::make_pair(new_goal.x / resolution, new_goal.y / resolution);
+		auto goal_x = ((new_goal.x() - map->getOriginX())/map->getResolution());
+		auto goal_y = (((new_goal.y() + 2) - map->getOriginY())/map->getResolution());
+
+		std::cout<<"INPUT: "<< new_goal.x() <<" "<< new_goal.y()<<std::endl;
+		std::cout<<"TRANSFORMED: "<< goal_x <<" "<< goal_y<<std::endl;
+	std::cout<<"_---------------"<<std::endl;
+
+
 
 		unsigned int index;
 		
-		map->getIndex(cells.first, cells.second, index);
+		map->getIndex(goal_x, goal_y, index);
 
 		goal = index;
 
@@ -150,21 +160,12 @@ int ChinesePostmanPlanner::findExplorationTarget(GridMap* map, unsigned int star
 	}
 
 	return EXPL_FINISHED;
-	*/
+	
 
 	
 	// Create some workspace for the wavefront algorithm
 	unsigned int mapSize = map->getSize();
 	double* plan = new double[mapSize];
-
-
-	std::cout<<"_---------------"<<std::endl;
-				unsigned int ax;
-			unsigned int ay;
-			map->getCoordinates(ax, ay, start);
-	std::cout<<"starting from "<< ax <<" "<<ay<<std::endl;
-	std::cout<<"MAP RESOLUTION----------> "<<map->getResolution()<<std::endl;
-
 
 	for(unsigned int i = 0; i < mapSize; i++)
 	{
@@ -364,6 +365,28 @@ void ChinesePostmanPlanner::drawEdge(int id)
 		_pubMarkers.publish(opposite_edge);
 
 	}
+
+
+}
+
+
+
+void ChinesePostmanPlanner::rvizToGrid(GridMap* map, geometry_msg::Point &pt, unsigned int &x, unsigned int &y)
+{
+
+	x = ((pt.x - map->getOriginX())/map->getResolution());
+	y = (((pt.y + 2) - map->getOriginY())/map->getResolution());
+
+
+
+}
+
+
+void ChinesePostmanPlanner::gridToRviz(GridMap* map, unsigned int &x, unsigned int &y, geometry_msg::Point &pt)
+{
+
+	pt.x = map->getOriginX() + (((double)x+0.5) * map->getResolution());
+	pt.y = map->getOriginY() + (((double)y+0.5) * map->getResolution()) - 2;
 
 
 }

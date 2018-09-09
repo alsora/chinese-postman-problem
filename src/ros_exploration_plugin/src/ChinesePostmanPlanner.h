@@ -16,6 +16,11 @@ class ChinesePostmanPlanner : public ExplorationPlanner
 
 		void drawVertex(int id);
 		void drawEdge(int Id);
+
+		void rvizToGrid(GridMap* map, geometry_msg::Point &pt, unsigned int &x, unsigned int &y);
+		void gridToRviz(GridMap* map, unsigned int &x, unsigned int &y, geometry_msg::Point &pt);
+
+
 		int unique_markers_id;
 
 
