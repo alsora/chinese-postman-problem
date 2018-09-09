@@ -1,12 +1,13 @@
 #include "ChinesePostmanPlanner.h"
 
 #include "ros/ros.h"
-#include "geometry_msgs/PointStamped.h"
 #include <visualization_msgs/Marker.h>
 #include <iostream>
 #include <string> 
 #include <sstream>
 #include <eigen3/Eigen/Dense>
+#include <math.h> 
+#include "graph/graph_utils.h"
 
 
 
@@ -22,15 +23,10 @@ void chatterCallback(const geometry_msgs::PointStamped::ConstPtr& msg)
 {
 
 	last_point = msg->point;
-		
-	//auto goal_x = ((new_goal.x() - map->getOriginX())/map->getResolution());
-	//auto goal_y = (((new_goal.y() + 2) - map->getOriginY())/map->getResolution());
-
 
 	last_point.y -= 2;
-	std::cout<<"I heard "<< last_point.x<<" " << last_point.y <<std::endl;
 
-//  ROS_INFO("I heard: [%d %d %d]", x, y, z);
+	ROS_INFO("I heard: [%f %f]", last_point.x, last_point.y);
 	new_msg = true;
 }
 
@@ -40,29 +36,27 @@ ChinesePostmanPlanner::ChinesePostmanPlanner()
 {	
 
 	unique_markers_id = 0;
+
+	_routing = RoutingProblem();
 	
 	_subMarkers = _nh.subscribe("clicked_point", 1000, chatterCallback);
 
 	_pubMarkers = _nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
 
 
-	ROS_INFO("THIS IS CPP PROBLEM");	
-
-	ROS_INFO("WAITING FOR POINTS TO BE PUBLISHED");	
+	ROS_INFO("Waiting for graph vertices to be published..");	
 
 
-	int i = 0;
-
-	while (i < 3)
+	while (_graph.vertices().size() < 10)
 	{
 		spinOnce();
 
 		if (!new_msg){ continue;}
 
-		i++;
-		_graph.addVertex(i, Eigen::Vector2f(last_point.x, last_point.y));
+		int vertex_id = _graph.vertices().size() + 1;
+		_graph.addVertex(vertex_id, Eigen::Vector2f(last_point.x, last_point.y));
 
-		drawVertex(i);
+		drawVertex(vertex_id);
 
 		new_msg = false;
 	
@@ -119,8 +113,22 @@ ChinesePostmanPlanner::ChinesePostmanPlanner()
 	}
 
 	ROS_INFO("Defined all edges.");	
+	ROS_INFO("Generating CPP instance...");	
 
+
+	_routing.init(_graph,1,1);
+
+	_circuit = _routing.solve();
+
+	_circuit = graph_utils::pathEdgesToVertices(_circuit, _graph, 1);
 	
+	ROS_INFO("Solved CPP");	
+
+	for (int i : _circuit){
+		std::cout<< i <<" ";
+	}
+	std::cout<<std::endl;
+
 
 }
 
@@ -132,126 +140,36 @@ ChinesePostmanPlanner::~ChinesePostmanPlanner()
 int ChinesePostmanPlanner::findExplorationTarget(GridMap* map, unsigned int start, unsigned int &goal)
 {
 
-	ROS_INFO("THIS IS CPP PROBLEM");
+	float goal_tolerance = 25;
 
-	for (int i = 1; i < _graph.vertices().size(); i++){
+	if (_circuit.empty()){
+		goal = start;
+		return EXPL_FINISHED;
+	}
 
-		Eigen::Vector2f new_goal = _graph.vertex(i)->position();
+	unsigned int start_x;
+	unsigned int start_y;
+	map->getCoordinates(start_x, start_y, start);
 
-		double resolution = map->getResolution();
+	while (true){
+
+		int new_goal_id = _circuit.front();
+		Eigen::Vector2f new_goal = _graph.vertex(new_goal_id)->position();
 
 		auto goal_x = ((new_goal.x() - map->getOriginX())/map->getResolution());
 		auto goal_y = (((new_goal.y() + 2) - map->getOriginY())/map->getResolution());
 
-		std::cout<<"INPUT: "<< new_goal.x() <<" "<< new_goal.y()<<std::endl;
-		std::cout<<"TRANSFORMED: "<< goal_x <<" "<< goal_y<<std::endl;
-	std::cout<<"_---------------"<<std::endl;
+		float distance = (goal_x - start_x)* (goal_x - start_x) + (goal_y - start_y)* (goal_y - start_y);
+
+		if (distance < goal_tolerance){
+			_circuit.erase(_circuit.begin());
+			continue;
+		}
 
 
-
-		unsigned int index;
-		
-		map->getIndex(goal_x, goal_y, index);
-
-		goal = index;
+		map->getIndex(goal_x, goal_y, goal);
 
 		return EXPL_TARGET_SET;
-
-	}
-
-	return EXPL_FINISHED;
-	
-
-	
-	// Create some workspace for the wavefront algorithm
-	unsigned int mapSize = map->getSize();
-	double* plan = new double[mapSize];
-
-	for(unsigned int i = 0; i < mapSize; i++)
-	{
-		plan[i] = -1;
-	}
-	
-	// Initialize the queue with the robot position
-	Queue queue;
-	Entry startPoint(0.0, start);
-	queue.insert(startPoint);
-	plan[start] = 0;
-	
-	Queue::iterator next;
-	double distance;
-	double linear = map->getResolution();
-	bool foundFrontier = false;
-	int cellCount = 0;
-	
-	// Do full search with weightless Dijkstra-Algorithm
-	while(!queue.empty())
-	{
-		cellCount++;
-		// Get the nearest cell from the queue
-		next = queue.begin();
-		distance = next->first;
-		unsigned int index = next->second;
-		queue.erase(next);
-		
-		// Add all adjacent cells
-		if(map->isFrontier(index))
-		{
-			// We reached the border of the map, which is unexplored terrain as well:
-			foundFrontier = true;
-			unsigned int x;
-			unsigned int y;
-			map->getCoordinates(x, y, index);
-			std::cout<<"MAP CELL ---> " << x <<" "<<y<< std::endl;
-
-			goal = index;
-			break;
-		}else
-		{
-			unsigned int ind[4];
-
-			ind[0] = index - 1;               // left
-			ind[1] = index + 1;               // right
-			ind[2] = index - map->getWidth(); // up
-			ind[3] = index + map->getWidth(); // down
-			
-			for(unsigned int it = 0; it < 4; it++)
-			{
-				unsigned int i = ind[it];
-				if(map->isFree(i) && plan[i] == -1)
-				{
-					queue.insert(Entry(distance+linear, i));
-					plan[i] = distance+linear;
-				}
-			}
-		}
-	}
-
-	//cell 94 131 at I: 24591
-
-	unsigned int x = 60;
-	unsigned int y = 131;
-
-	unsigned int index;
-	
-	map->getIndex(x, y, index);
-
-	std::cout<<"GOAL AT: "<< x <<" "<< y <<" with index "<< index<<std::endl;
-
-	goal = index;
-	
-
-	ROS_DEBUG("Checked %d cells.", cellCount);	
-	delete[] plan;
-	if(foundFrontier)
-	{
-		return EXPL_FINISHED;
-	}else
-	{
-		if(cellCount > 50)
-			return EXPL_FINISHED;
-		else
-			return EXPL_FAILED;
 	}
 
 	
@@ -371,7 +289,7 @@ void ChinesePostmanPlanner::drawEdge(int id)
 
 
 
-void ChinesePostmanPlanner::rvizToGrid(GridMap* map, geometry_msg::Point &pt, unsigned int &x, unsigned int &y)
+void ChinesePostmanPlanner::rvizToGrid(GridMap* map, geometry_msgs::Point &pt, unsigned int &x, unsigned int &y)
 {
 
 	x = ((pt.x - map->getOriginX())/map->getResolution());
@@ -382,7 +300,7 @@ void ChinesePostmanPlanner::rvizToGrid(GridMap* map, geometry_msg::Point &pt, un
 }
 
 
-void ChinesePostmanPlanner::gridToRviz(GridMap* map, unsigned int &x, unsigned int &y, geometry_msg::Point &pt)
+void ChinesePostmanPlanner::gridToRviz(GridMap* map, unsigned int &x, unsigned int &y, geometry_msgs::Point &pt)
 {
 
 	pt.x = map->getOriginX() + (((double)x+0.5) * map->getResolution());

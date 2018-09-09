@@ -2,7 +2,9 @@
 #define CHINESEPOSTMANPLANNER_H
 
 #include <nav2d_navigator/ExplorationPlanner.h>
+#include "geometry_msgs/PointStamped.h"
 #include "graph/graph.h"
+#include "routing/routing_problem.h"
 
 class ChinesePostmanPlanner : public ExplorationPlanner
 {
@@ -17,14 +19,16 @@ class ChinesePostmanPlanner : public ExplorationPlanner
 		void drawVertex(int id);
 		void drawEdge(int Id);
 
-		void rvizToGrid(GridMap* map, geometry_msg::Point &pt, unsigned int &x, unsigned int &y);
-		void gridToRviz(GridMap* map, unsigned int &x, unsigned int &y, geometry_msg::Point &pt);
+		void rvizToGrid(GridMap* map, geometry_msgs::Point &pt, unsigned int &x, unsigned int &y);
+		void gridToRviz(GridMap* map, unsigned int &x, unsigned int &y, geometry_msgs::Point &pt);
 
 
 		int unique_markers_id;
 
 
 		Graph _graph;
+		std::vector<int> _circuit;
+		RoutingProblem _routing;
 
         ros::NodeHandle _nh;
         

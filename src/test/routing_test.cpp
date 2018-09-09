@@ -13,7 +13,6 @@ int main()
 {
 
     srand(time(0));
-    std::cout<<"HERE "<<std::endl;
     std::pair<Graph, std::set<int>> res = buildRandomGraph();
     Graph graph = res.first;
     std::set<int> eset = res.second;
