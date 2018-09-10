@@ -27,7 +27,7 @@ The code has been developed and tested on Ubuntu 16.04
 
 ### Instructions
 
-You can decide wether to build only the library (and its tests) or also the ROS exploration plugin.
+You can decide whether to build only the library (and its tests) or also the ROS exploration plugin.
 
 ##### Library only
 
