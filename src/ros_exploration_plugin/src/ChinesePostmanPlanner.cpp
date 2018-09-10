@@ -26,7 +26,7 @@ void chatterCallback(const geometry_msgs::PointStamped::ConstPtr& msg)
 
 	last_point.y -= 2;
 
-	ROS_INFO("I heard: [%f %f]", last_point.x, last_point.y);
+	ROS_INFO("Clicked point: [%f %f]", last_point.x, last_point.y);
 	new_msg = true;
 }
 
@@ -43,76 +43,9 @@ ChinesePostmanPlanner::ChinesePostmanPlanner()
 
 	_pubMarkers = _nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
 
-
-	ROS_INFO("Waiting for graph vertices to be published..");	
-
-
-	while (_graph.vertices().size() < 10)
-	{
-		spinOnce();
-
-		if (!new_msg){ continue;}
-
-		int vertex_id = _graph.vertices().size() + 1;
-		_graph.addVertex(vertex_id, Eigen::Vector2f(last_point.x, last_point.y));
-
-		drawVertex(vertex_id);
-
-		new_msg = false;
-	
-	}
-
-	ROS_INFO("Graph's vertices created! Now define the edges");	
-	ROS_INFO("Write the id of the two vertices you want to connect. Write \"-1 -1\" to stop.");	
-
-	while (true){
-
-		std::string text;
-		std::vector<int> vertices_pair;
-
-		getline (std::cin, text);
-		
-		int n;
-		std::stringstream stream(text);
-		while(stream >> n){
-			vertices_pair.push_back(n);
-		}
-
-		if (vertices_pair.size() != 2){
-
-			//std::ostringstream error_stream;
-			//error_stream << "Error. Expected exactly 2 vertices id. Parsed "<<vertices_pair.size()<<" in: \""<< text << "\"";
-			//std::string error_string = error_stream.str();
-			ROS_ERROR("You must write 2 numbers or \"-1 -1\" to stop.");	
-		}
-
-		int fromId = vertices_pair[0];
-		int toId = vertices_pair[1];	
-		bool undirected = true;
+	parseInputGraph();
 
 
-		if (fromId <= 0 && toId <=0){
-			break;	
-		}
-
-		Graph::Vertex* fromV = _graph.vertex(fromId);
-		Graph::Vertex* toV = _graph.vertex(toId);
-
-
-		if (fromV == nullptr || toV == nullptr){
-			ROS_ERROR("One of the entered id is not present in the graph.");
-			continue;
-		}
-
-		Graph::Edge* e = _graph.addEdge(fromId, toId, undirected);
-
-		drawEdge(e->id());
-
-		ROS_INFO("Define another edge or write \"-1 -1\" to stop.");	
-
-	}
-
-	ROS_INFO("Defined all edges.");	
 	ROS_INFO("Generating CPP instance...");	
 
 
@@ -287,6 +220,144 @@ void ChinesePostmanPlanner::drawEdge(int id)
 
 }
 
+void ChinesePostmanPlanner::parseInputGraph()
+{
+
+	parseInputVertices();
+
+	ROS_INFO("Graph's vertices created! Now define the edges");	
+
+	std::vector<std::vector<int>> connectedComponents = std::vector<std::vector<int>>();
+
+	while (connectedComponents.size() != 1){
+
+		parseInputEdges();
+
+		connectedComponents = graph_utils::tarjanConnectedComponents(_graph);
+		if (connectedComponents.size() != 1){
+			ROS_ERROR("The defined graph is not fully connected! It has %d connected components", connectedComponents.size());
+			for (int i = 0; i < connectedComponents.size(); i ++){
+				std::stringstream component_text("");
+				component_text<<"Components";
+				component_text<< i + 1;
+				component_text<<": ";
+				for (int j = 0; j < connectedComponents[i].size(); j ++){
+					component_text << connectedComponents[i][j];
+					component_text << " ";
+				}
+				
+				ROS_INFO("%s\n", component_text.str());
+			}
+
+			ROS_INFO("Select one option. 0 for adding new eges to this graph. 1 for aborting");
+			
+			std::string text;
+			getline (std::cin, text);
+					
+			std::stringstream ss(text);
+			int i;
+			if ((ss >> i).fail() || !(ss >> std::ws).eof())
+			{
+				ROS_ERROR("Your selection is not valid. Aborting");
+			}
+			if (i != 0 && i != 1){
+				ROS_ERROR("Your selection is not valid. Aborting");
+			}
+			if (i == 0){
+				continue;
+			}
+			
+		}
+	}
+
+
+
+	ROS_INFO("Defined all edges.");	
+	ROS_INFO("Graph succesfully created.");	
+
+
+}
+
+
+
+
+
+void ChinesePostmanPlanner::parseInputVertices()
+{
+
+	ROS_INFO("Waiting for graph vertices to be published..");	
+
+
+	while (_graph.vertices().size() < 4)
+	{
+		spinOnce();
+
+		if (!new_msg){ continue;}
+
+		int vertex_id = _graph.vertices().size() + 1;
+		_graph.addVertex(vertex_id, Eigen::Vector2f(last_point.x, last_point.y));
+
+		drawVertex(vertex_id);
+
+		new_msg = false;
+	
+	}
+
+
+}
+
+
+
+void ChinesePostmanPlanner::parseInputEdges()
+{
+
+	ROS_INFO("Write the id of the two vertices you want to connect. Write \"-1 -1\" to stop.");	
+
+	while (true){
+
+		std::string text;
+		std::vector<int> vertices_pair;
+
+		getline (std::cin, text);
+		
+		int n;
+		std::stringstream stream(text);
+		while(stream >> n){
+			vertices_pair.push_back(n);
+		}
+
+		if (vertices_pair.size() != 2){
+			ROS_ERROR("You must write 2 numbers or \"-1 -1\" to stop.");
+			continue;	
+		}
+
+		int fromId = vertices_pair[0];
+		int toId = vertices_pair[1];	
+		bool undirected = true;
+
+
+		if (fromId == -1 && toId == -1){
+			break;	
+		}
+
+		Graph::Vertex* fromV = _graph.vertex(fromId);
+		Graph::Vertex* toV = _graph.vertex(toId);
+
+
+		if (fromV == nullptr || toV == nullptr){
+			ROS_ERROR("One of the entered id is not present in the graph.");
+			continue;
+		}
+
+		Graph::Edge* e = _graph.addEdge(fromId, toId, undirected);
+
+		drawEdge(e->id());
+
+		ROS_INFO("Define another edge or write \"-1 -1\" to stop.");	
+
+	}
+
+}
 
 
 void ChinesePostmanPlanner::rvizToGrid(GridMap* map, geometry_msgs::Point &pt, unsigned int &x, unsigned int &y)
